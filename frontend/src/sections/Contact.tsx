@@ -39,6 +39,17 @@ export default function Contact() {
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  
+  // Store the submitted data separately for email/WhatsApp
+  const [submittedData, setSubmittedData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: '',
+    email_subject: 'New Contact Message'
+  });
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -70,42 +81,25 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Prepare the message for WhatsApp and Email
-    const contactMessage = `
-*New Contact Message - THE HURBERT*
-
-*From:*
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone || 'Not provided'}
-
-*Subject:*
-${formData.subject || 'No subject'}
-
-*Message:*
-${formData.message}
-    `.trim();
-
-    // Open WhatsApp with pre-filled message
-    const whatsappUrl = `https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent(contactMessage)}`;
-    window.open(whatsappUrl, '_blank');
-
-    // Also send email
-    const emailSubject = formData.subject || 'New Contact Message';
-    const emailBody = encodeURIComponent(contactMessage);
-    const emailUrl = `mailto:${CONTACT_INFO.email}?subject=${encodeURIComponent(emailSubject)}&body=${emailBody}`;
+    const subject = formData.subject || 'New Contact Message';
     
-    // Small delay before opening email to allow WhatsApp to open first
-    setTimeout(() => {
-      window.open(emailUrl, '_blank');
-    }, 500);
+    // Store the submitted data for later use
+    setSubmittedData({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      subject: formData.subject,
+      message: formData.message,
+      email_subject: subject
+    });
 
-    // Show success message
     setSubmitSuccess(true);
+    
+    // Clear form
     setFormData({
       name: '',
       email: '',
@@ -114,13 +108,62 @@ ${formData.message}
       message: '',
     });
 
-    setTimeout(() => setSubmitSuccess(false), 5000);
     setIsSubmitting(false);
   };
 
   const openWhatsApp = () => {
-    const message = encodeURIComponent('Hello THE HURBERT! I would like to inquire about your services.');
-    window.open(`https://wa.me/${CONTACT_INFO.whatsapp}?text=${message}`, '_blank');
+    // Use submittedData instead of formData
+    const message = `New Contact Message - THE HURBERT
+
+From:
+Name: ${submittedData.name || 'NOT PROVIDED'}
+Email: ${submittedData.email || 'NOT PROVIDED'}
+Phone: ${submittedData.phone || 'Not provided'}
+
+Subject:
+${submittedData.subject || 'No subject'}
+
+Message:
+${submittedData.message || 'No message provided'}`;
+
+    const whatsappUrl = `https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const openEmail = () => {
+    // Use submittedData instead of formData
+    const shortMessage = `CONTACT MESSAGE - THE HURBERT
+
+FROM:
+Name: ${submittedData.name || 'NOT PROVIDED'}
+Email: ${submittedData.email || 'NOT PROVIDED'}
+Phone: ${submittedData.phone || 'Not provided'}
+
+SUBJECT:
+${submittedData.subject || 'No subject'}
+
+MESSAGE:
+${submittedData.message || 'No message provided'}
+
+---
+This message was sent from THE HURBERT contact form.`;
+
+    // Gmail web interface URL
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(submittedData.email_subject)}&body=${encodeURIComponent(shortMessage)}`;
+    
+    // Open Gmail in a new tab
+    window.open(gmailUrl, '_blank');
+  };
+
+  const openBoth = () => {
+    openWhatsApp();
+    setTimeout(() => {
+      openEmail();
+    }, 500);
+  };
+
+  const resetForm = () => {
+    setSubmitSuccess(false);
   };
 
   return (
@@ -223,14 +266,16 @@ ${formData.message}
                   <p className="text-gray-600 text-sm mb-4">
                     Get instant responses to your queries via WhatsApp at {CONTACT_INFO.phone}.
                   </p>
-                  <button
-                    onClick={openWhatsApp}
+                  <a
+                    href={`https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent('Hello THE HURBERT! I would like to inquire about your services.')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-green-500 text-white px-6 py-3 rounded-lg font-semibold text-sm uppercase tracking-wider transition-all duration-300 hover:bg-green-600"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
                     <MessageCircle className="w-5 h-5" />
                     Start Chat
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -254,14 +299,40 @@ ${formData.message}
                     className="text-2xl font-bold text-black mb-4"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    Message Sent!
+                    Message Received!
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Thank you for reaching out. We've opened WhatsApp and email for you to complete your message.
+                  <p className="text-gray-600 mb-6">
+                    Thank you for reaching out. Please choose how you'd like to send your message:
                   </p>
-                  <p className="text-sm text-gray-500">
-                    We'll get back to you soon.
-                  </p>
+                  <div className="space-y-3">
+                    <button
+                      onClick={openWhatsApp}
+                      className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-green-600"
+                    >
+                      <MessageCircle className="w-5 h-5" />
+                      Send via WhatsApp
+                    </button>
+                    <button
+                      onClick={openEmail}
+                      className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-blue-600"
+                    >
+                      <Mail className="w-5 h-5" />
+                      Send via Gmail
+                    </button>
+                    <button
+                      onClick={openBoth}
+                      className="w-full bg-[#c9a86c] text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-black"
+                    >
+                      <Send className="w-5 h-5" />
+                      Send to Both
+                    </button>
+                  </div>
+                  <button
+                    onClick={resetForm}
+                    className="mt-6 text-gray-500 text-sm hover:text-[#c9a86c] transition-colors"
+                  >
+                    Send another message
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -364,7 +435,7 @@ ${formData.message}
                   </button>
 
                   <p className="text-xs text-gray-500 text-center">
-                    By submitting, you'll be redirected to WhatsApp and email to complete your message.
+                    After submitting, you'll be able to send your message via WhatsApp or Gmail.
                   </p>
                 </form>
               )}
@@ -374,13 +445,15 @@ ${formData.message}
       </div>
 
       {/* Floating WhatsApp Button */}
-      <button
-        onClick={openWhatsApp}
+      <a
+        href={`https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent('Hello THE HURBERT! I would like to inquire about your services.')}`}
+        target="_blank"
+        rel="noopener noreferrer"
         className="fixed bottom-8 right-8 w-14 h-14 bg-green-500 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 z-50"
         aria-label="Chat on WhatsApp"
       >
         <MessageCircle className="w-7 h-7 text-white" />
-      </button>
+      </a>
     </section>
   );
 }

@@ -21,6 +21,20 @@ export default function Booking() {
   const [selectedType, setSelectedType] = useState('event');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  
+  // Store the submitted data separately for email/WhatsApp
+  const [submittedData, setSubmittedData] = useState({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    start_date: '',
+    end_date: '',
+    number_of_guests: 1,
+    message: '',
+    service_type: 'Event Management',
+    email_subject: ''
+  });
+
   const [formData, setFormData] = useState({
     customer_name: '',
     customer_email: '',
@@ -54,46 +68,28 @@ export default function Booking() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Prepare the message for WhatsApp and Email
-    const bookingMessage = `
-*New Booking Request - THE HURBERT*
-
-*Service Type:* ${bookingTypes.find(t => t.id === selectedType)?.label}
-
-*Customer Details:*
-Name: ${formData.customer_name}
-Email: ${formData.customer_email}
-Phone: ${formData.customer_phone || 'Not provided'}
-
-*Booking Details:*
-Start Date: ${formData.start_date || 'Not specified'}
-End Date: ${formData.end_date || 'Not specified'}
-Number of Guests: ${formData.number_of_guests}
-
-*Message:*
-${formData.message || 'No additional message'}
-    `.trim();
-
-    // Open WhatsApp with pre-filled message
-    const whatsappUrl = `https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent(bookingMessage)}`;
-    window.open(whatsappUrl, '_blank');
-
-    // Also send email
-    const emailSubject = `New Booking Request - ${bookingTypes.find(t => t.id === selectedType)?.label}`;
-    const emailBody = encodeURIComponent(bookingMessage);
-    const emailUrl = `mailto:${CONTACT_INFO.email}?subject=${encodeURIComponent(emailSubject)}&body=${emailBody}`;
+    const serviceLabel = bookingTypes.find(t => t.id === selectedType)?.label || 'Booking';
     
-    // Small delay before opening email to allow WhatsApp to open first
-    setTimeout(() => {
-      window.open(emailUrl, '_blank');
-    }, 500);
+    // Store the submitted data for later use
+    setSubmittedData({
+      customer_name: formData.customer_name,
+      customer_email: formData.customer_email,
+      customer_phone: formData.customer_phone,
+      start_date: formData.start_date,
+      end_date: formData.end_date,
+      number_of_guests: formData.number_of_guests,
+      message: formData.message,
+      service_type: serviceLabel,
+      email_subject: `New Booking Request - ${serviceLabel}`
+    });
 
-    // Show success message
     setSubmitSuccess(true);
+    
+    // Clear form
     setFormData({
       customer_name: '',
       customer_email: '',
@@ -104,13 +100,70 @@ ${formData.message || 'No additional message'}
       message: '',
     });
 
-    setTimeout(() => setSubmitSuccess(false), 5000);
     setIsSubmitting(false);
   };
 
   const openWhatsApp = () => {
-    const message = encodeURIComponent('Hello THE HURBERT! I would like to make a booking inquiry.');
-    window.open(`https://wa.me/${CONTACT_INFO.whatsapp}?text=${message}`, '_blank');
+    // Use submittedData instead of formData
+    const message = `New Booking Request - THE HURBERT
+
+Service Type: ${submittedData.service_type}
+
+Customer Details:
+Name: ${submittedData.customer_name}
+Email: ${submittedData.customer_email}
+Phone: ${submittedData.customer_phone || 'Not provided'}
+
+Booking Details:
+Start Date: ${submittedData.start_date || 'Not specified'}
+End Date: ${submittedData.end_date || 'Not specified'}
+Number of Guests: ${submittedData.number_of_guests}
+
+Message:
+${submittedData.message || 'No additional message'}`;
+
+    const whatsappUrl = `https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const openEmail = () => {
+    // Use submittedData instead of formData
+    const shortMessage = `BOOKING REQUEST - ${submittedData.service_type}
+
+SERVICE TYPE: ${submittedData.service_type}
+
+CUSTOMER DETAILS:
+Name: ${submittedData.customer_name || 'NOT PROVIDED'}
+Email: ${submittedData.customer_email || 'NOT PROVIDED'}
+Phone: ${submittedData.customer_phone || 'Not provided'}
+
+BOOKING DETAILS:
+Start Date: ${submittedData.start_date || 'Not specified'}
+End Date: ${submittedData.end_date || 'Not specified'}
+Number of Guests: ${submittedData.number_of_guests}
+
+MESSAGE:
+${submittedData.message || 'No additional message'}
+
+---
+This booking request was sent from THE HURBERT website.`;
+
+    // Gmail web interface URL
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(submittedData.email_subject)}&body=${encodeURIComponent(shortMessage)}`;
+    
+    // Open Gmail in a new tab
+    window.open(gmailUrl, '_blank');
+  };
+
+  const openBoth = () => {
+    openWhatsApp();
+    setTimeout(() => {
+      openEmail();
+    }, 500);
+  };
+
+  const resetForm = () => {
+    setSubmitSuccess(false);
   };
 
   return (
@@ -244,14 +297,16 @@ ${formData.message || 'No additional message'}
                   <span>{CONTACT_INFO.address}</span>
                 </p>
               </div>
-              <button
-                onClick={openWhatsApp}
+              <a
+                href={`https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent('Hello THE HURBERT! I would like to make a booking inquiry.')}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-4 w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-green-600"
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
               >
                 <MessageSquare className="w-5 h-5" />
                 Chat on WhatsApp
-              </button>
+              </a>
             </div>
           </div>
 
@@ -273,14 +328,40 @@ ${formData.message || 'No additional message'}
                     className="text-2xl font-bold text-black mb-4"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    Booking Submitted!
+                    Booking Request Received!
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    Thank you for your booking request. We've opened WhatsApp and email for you to complete your submission.
+                  <p className="text-gray-600 mb-6">
+                    Thank you for your booking request. Please choose how you'd like to send your message:
                   </p>
-                  <p className="text-sm text-gray-500">
-                    Our team will contact you within 24 hours.
-                  </p>
+                  <div className="space-y-3">
+                    <button
+                      onClick={openWhatsApp}
+                      className="w-full bg-green-500 text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-green-600"
+                    >
+                      <MessageSquare className="w-5 h-5" />
+                      Send via WhatsApp
+                    </button>
+                    <button
+                      onClick={openEmail}
+                      className="w-full bg-blue-500 text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-blue-600"
+                    >
+                      <Mail className="w-5 h-5" />
+                      Send via Gmail
+                    </button>
+                    <button
+                      onClick={openBoth}
+                      className="w-full bg-[#c9a86c] text-white py-3 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-black"
+                    >
+                      <Send className="w-5 h-5" />
+                      Send to Both
+                    </button>
+                  </div>
+                  <button
+                    onClick={resetForm}
+                    className="mt-6 text-gray-500 text-sm hover:text-[#c9a86c] transition-colors"
+                  >
+                    Submit another request
+                  </button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
@@ -431,7 +512,7 @@ ${formData.message || 'No additional message'}
                   </button>
 
                   <p className="text-xs text-gray-500 text-center">
-                    By submitting, you'll be redirected to WhatsApp and email to complete your booking request.
+                    After submitting, you'll be able to send your request via WhatsApp or Gmail.
                   </p>
                 </form>
               )}

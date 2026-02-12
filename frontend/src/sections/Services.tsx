@@ -6,7 +6,7 @@ const services = [
     id: 1,
     title: 'Events Consultancy',
     description: 'Strategic event planning and expert guidance to make your vision a reality.',
-    image: 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&q=80',
+    image: '/norrsken.png',
     icon: Calendar,
     link: '#contact',
     details: {
@@ -81,7 +81,7 @@ const services = [
     id: 4,
     title: 'Destination Management',
     description: 'Complete destination experiences showcasing the best of Rwanda.',
-    image: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=800&q=80',
+    image: '/tourism.png',
     icon: MapPin,
     link: '#contact',
     details: {
