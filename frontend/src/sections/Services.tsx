@@ -104,6 +104,12 @@ const services = [
   },
 ];
 
+// Contact Information
+const CONTACT_INFO = {
+  email: 'cardinaloichirwa@gmail.com',
+  whatsapp: '250782169162',
+};
+
 export default function Services() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -137,9 +143,29 @@ export default function Services() {
   };
 
   const openWhatsApp = () => {
-    const phoneNumber = '250782169162';
     const message = encodeURIComponent(`Hello THE HURBERT! I'm interested in your ${selectedService?.title} service.`);
-    window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+    window.open(`https://wa.me/${CONTACT_INFO.whatsapp}?text=${message}`, '_blank');
+  };
+
+  const openEmail = () => {
+    if (!selectedService) return;
+    
+    // Create email subject and body
+    const subject = `Inquiry: ${selectedService.title} Service - THE HURBERT`;
+    const body = `I'm interested in learning more about your ${selectedService.title} service.
+
+Service Details:
+- ${selectedService.description}
+
+Could you please provide more information about pricing and availability?
+
+Thank you.`;
+
+    // Gmail web interface URL (works 100% of the time)
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    
+    // Open Gmail in a new tab
+    window.open(gmailUrl, '_blank');
   };
 
   return (
@@ -385,8 +411,8 @@ export default function Services() {
                     Chat on WhatsApp
                   </button>
                   <button
-                    onClick={() => window.open('mailto:cardinaloichirwa@gmail.com', '_blank')}
-                    className="flex-1 bg-gray-100 text-black px-6 py-4 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-gray-200"
+                    onClick={openEmail}
+                    className="flex-1 bg-blue-500 text-white px-6 py-4 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-blue-600"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
                     <Mail className="w-5 h-5" />
