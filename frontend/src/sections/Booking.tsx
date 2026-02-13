@@ -22,7 +22,7 @@ export default function Booking() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   
-  // Store the submitted data separately for email/WhatsApp
+  // Store submitted data for WhatsApp/Email
   const [submittedData, setSubmittedData] = useState({
     customer_name: '',
     customer_email: '',
@@ -32,7 +32,6 @@ export default function Booking() {
     number_of_guests: 1,
     message: '',
     service_type: 'Event Management',
-    email_subject: ''
   });
 
   const [formData, setFormData] = useState({
@@ -74,7 +73,7 @@ export default function Booking() {
 
     const serviceLabel = bookingTypes.find(t => t.id === selectedType)?.label || 'Booking';
     
-    // Store the submitted data for later use
+    // ✅ STORE DATA for WhatsApp/Email
     setSubmittedData({
       customer_name: formData.customer_name,
       customer_email: formData.customer_email,
@@ -84,7 +83,6 @@ export default function Booking() {
       number_of_guests: formData.number_of_guests,
       message: formData.message,
       service_type: serviceLabel,
-      email_subject: `New Booking Request - ${serviceLabel}`
     });
 
     setSubmitSuccess(true);
@@ -104,7 +102,6 @@ export default function Booking() {
   };
 
   const openWhatsApp = () => {
-    // Use submittedData instead of formData
     const message = `New Booking Request - THE HURBERT
 
 Service Type: ${submittedData.service_type}
@@ -127,14 +124,12 @@ ${submittedData.message || 'No additional message'}`;
   };
 
   const openEmail = () => {
-    // Use submittedData instead of formData
-    const shortMessage = `BOOKING REQUEST - ${submittedData.service_type}
-
-SERVICE TYPE: ${submittedData.service_type}
+    const subject = `New Booking Request - ${submittedData.service_type}`;
+    const body = `BOOKING REQUEST - ${submittedData.service_type}
 
 CUSTOMER DETAILS:
-Name: ${submittedData.customer_name || 'NOT PROVIDED'}
-Email: ${submittedData.customer_email || 'NOT PROVIDED'}
+Name: ${submittedData.customer_name}
+Email: ${submittedData.customer_email}
 Phone: ${submittedData.customer_phone || 'Not provided'}
 
 BOOKING DETAILS:
@@ -146,19 +141,40 @@ MESSAGE:
 ${submittedData.message || 'No additional message'}
 
 ---
-This booking request was sent from THE HURBERT website.`;
-
-    // Gmail web interface URL
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(submittedData.email_subject)}&body=${encodeURIComponent(shortMessage)}`;
+Sent from THE HURBERT website.`;
     
-    // Open Gmail in a new tab
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(gmailUrl, '_blank');
   };
 
+  // ✅ FIXED: openBoth function - THIS IS THE CORRECT ONE FOR BOOKING.TSX
   const openBoth = () => {
+    // Open WhatsApp
     openWhatsApp();
+    
+    // Open Gmail in new tab after short delay
     setTimeout(() => {
-      openEmail();
+      const subject = `New Booking Request - ${submittedData.service_type}`;
+      const body = `BOOKING REQUEST - ${submittedData.service_type}
+
+CUSTOMER DETAILS:
+Name: ${submittedData.customer_name}
+Email: ${submittedData.customer_email}
+Phone: ${submittedData.customer_phone || 'Not provided'}
+
+BOOKING DETAILS:
+Start Date: ${submittedData.start_date || 'Not specified'}
+End Date: ${submittedData.end_date || 'Not specified'}
+Number of Guests: ${submittedData.number_of_guests}
+
+MESSAGE:
+${submittedData.message || 'No additional message'}
+
+---
+Sent from THE HURBERT website.`;
+      
+      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(gmailUrl, '_blank');
     }, 500);
   };
 
