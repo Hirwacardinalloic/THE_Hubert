@@ -156,11 +156,24 @@ This message was sent from THE HURBERT contact form.`;
   };
 
   const openBoth = () => {
-    openWhatsApp();
-    setTimeout(() => {
-      openEmail();
-    }, 500);
-  };
+  // Open WhatsApp
+  openWhatsApp();
+  
+  // Open email in a new tab
+  setTimeout(() => {
+    const subject = `Contact Message from ${submittedData.name}`;
+    const body = `Name: ${submittedData.name}
+Email: ${submittedData.email}
+Phone: ${submittedData.phone || 'Not provided'}
+Subject: ${submittedData.subject || 'No subject'}
+
+Message:
+${submittedData.message}`;
+    
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=cardinaloichirwa@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(gmailUrl, '_blank');
+  }, 300);
+};
 
   const resetForm = () => {
     setSubmitSuccess(false);
