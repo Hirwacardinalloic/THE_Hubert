@@ -7,6 +7,8 @@ import Hero from './sections/Hero';
 import About from './sections/About';
 import Services from './sections/Services';
 import Portfolio from './sections/Portfolio';
+import Partners from './sections/Partners';
+import Staff from './sections/Staff';
 import Booking from './sections/Booking';
 import Contact from './sections/Contact';
 import Footer from './sections/Footer';
@@ -46,6 +48,8 @@ function PublicLayout() {
         <About />
         <Services />
         <Portfolio />
+        <Staff /> 
+        <Partners />        
         <Booking />
         <Contact />
       </main>

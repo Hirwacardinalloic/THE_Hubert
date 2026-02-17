@@ -102,6 +102,7 @@ export default function Booking() {
   };
 
   const openWhatsApp = () => {
+    // ✅ Use submittedData directly
     const message = `New Booking Request - THE HURBERT
 
 Service Type: ${submittedData.service_type}
@@ -124,6 +125,7 @@ ${submittedData.message || 'No additional message'}`;
   };
 
   const openEmail = () => {
+    // ✅ Use submittedData directly
     const subject = `New Booking Request - ${submittedData.service_type}`;
     const body = `BOOKING REQUEST - ${submittedData.service_type}
 
@@ -147,34 +149,13 @@ Sent from THE HURBERT website.`;
     window.open(gmailUrl, '_blank');
   };
 
-  // ✅ FIXED: openBoth function - THIS IS THE CORRECT ONE FOR BOOKING.TSX
   const openBoth = () => {
-    // Open WhatsApp
+    // ✅ Open WhatsApp
     openWhatsApp();
     
-    // Open Gmail in new tab after short delay
+    // ✅ Open Gmail in new tab after short delay
     setTimeout(() => {
-      const subject = `New Booking Request - ${submittedData.service_type}`;
-      const body = `BOOKING REQUEST - ${submittedData.service_type}
-
-CUSTOMER DETAILS:
-Name: ${submittedData.customer_name}
-Email: ${submittedData.customer_email}
-Phone: ${submittedData.customer_phone || 'Not provided'}
-
-BOOKING DETAILS:
-Start Date: ${submittedData.start_date || 'Not specified'}
-End Date: ${submittedData.end_date || 'Not specified'}
-Number of Guests: ${submittedData.number_of_guests}
-
-MESSAGE:
-${submittedData.message || 'No additional message'}
-
----
-Sent from THE HURBERT website.`;
-      
-      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.open(gmailUrl, '_blank');
+      openEmail();
     }, 500);
   };
 
@@ -288,7 +269,7 @@ Sent from THE HURBERT website.`;
             </div>
 
             {/* Contact Info */}
-            <div className="mt-10 p-6 bg-black rounded-xl text-white">
+            <div className="mt-10 p-6 bg-gray-100 rounded-xl text-black">
               <h4
                 className="font-semibold mb-4"
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
