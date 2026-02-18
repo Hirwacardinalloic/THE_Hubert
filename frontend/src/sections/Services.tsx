@@ -106,7 +106,7 @@ const services = [
 
 // Contact Information
 const CONTACT_INFO = {
-  email: 'cardinaloichirwa@gmail.com',
+  email: 'thehurbertltd@gmail.com',
   whatsapp: '250782169162',
 };
 

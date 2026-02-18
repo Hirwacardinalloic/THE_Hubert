@@ -153,7 +153,7 @@ function initializeTables() {
   db.run(`
     INSERT OR IGNORE INTO users (username, email, password, role)
     VALUES (?, ?, ?, ?)
-  `, ['admin', 'admin@rwandaevents.com', defaultPassword, 'admin']);
+  `, ['admin', 'admin@thehurbert.com', defaultPassword, 'admin']);
 
   console.log('Database tables initialized');
 }

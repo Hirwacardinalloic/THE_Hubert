@@ -1,73 +1,80 @@
-# React + TypeScript + Vite
+THE HURBERT - Official Website
+A modern, responsive website for THE HURBERT, a luxury event management and hospitality company based in Kigali, Rwanda.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+🚀 Tech Stack
+React 18 - Frontend library
 
-Currently, two official plugins are available:
+TypeScript - Type safety
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Vite - Build tool and development server
 
-## React Compiler
+Tailwind CSS - Styling
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Lucide React - Icons
 
-## Expanding the ESLint configuration
+📋 Project Structure
+text
+src/
+├── sections/           # Main page sections
+│   ├── Header.tsx     # Navigation header
+│   ├── Hero.tsx       # Home/landing section
+│   ├── About.tsx      # Company information
+│   ├── Services.tsx   # Services offered
+│   ├── Portfolio.tsx  # Past work gallery
+│   ├── Staff.tsx      # Team members with modal profiles
+│   ├── Partners.tsx   # Company partners with logos
+│   ├── Booking.tsx    # Booking form with WhatsApp/Email
+│   ├── Contact.tsx    # Contact form with WhatsApp/Email
+│   └── Footer.tsx     # Site footer
+├── App.tsx            # Main component with routing
+└── main.tsx          # Entry point
+✨ Features
+Responsive Design - Works on all devices
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Smooth Scrolling - Navigation between sections
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Interactive UI - Hover effects, modals, animations
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Service Details Modal - Click services to see more info
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Staff Profiles - Click team members to view full details
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Partner Logos - Display company partners
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Booking System - Form submits to WhatsApp and Gmail
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Contact Form - Direct messaging via WhatsApp and Email
+
+🛠️ Development
+bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+🎨 Color Scheme
+Primary Gold: #c9a86c - Used for accents, buttons, highlights
+
+Secondary: Black and white with various grays
+
+WhatsApp Green: bg-green-500 - For WhatsApp buttons
+
+📱 Contact Information
+Phone: 0782169162
+
+WhatsApp: +250782169162
+
+Email: cardinaloichirwa@gmail.com
+
+Address: 1 KN 78 St, Kigali
+
+🌐 Live Demo
+[Add your live URL here when deployed]
+
+Built with ❤️ for THE HURBERT

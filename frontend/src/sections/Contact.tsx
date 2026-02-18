@@ -5,7 +5,7 @@ import { MapPin, Phone, Mail, Clock, Send, MessageCircle, CheckCircle, MapPinned
 const CONTACT_INFO = {
   phone: '0782169162',
   whatsapp: '250782169162',
-  email: 'cardinaloichirwa@gmail.com',
+  email: 'thehurbertltd@gmail.com',
   address: '1 KN 78 St, Kigali',
 };
 
@@ -170,7 +170,7 @@ Subject: ${submittedData.subject || 'No subject'}
 Message:
 ${submittedData.message}`;
     
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=cardinaloichirwa@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=thehurbertltd@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(gmailUrl, '_blank');
   }, 300);
 };
