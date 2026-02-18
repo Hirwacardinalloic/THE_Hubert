@@ -1,129 +1,392 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Calendar, MapPin, X, Users, Clock, CheckCircle } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, X, Users, Clock, CheckCircle, Car, Star, Briefcase, Mountain, TreePine, Landmark, Waves } from 'lucide-react';
 
-const projects = [
+// Events/Projects
+const events = [
   {
     id: 1,
+    title: 'Founders Friday at Norrsken',
+    category: '2025',
+    location: 'Norrsken House Kigali',
+    date: 'Last Friday of every month',
+    image: '/norrsken.png',
+    description: 'A monthly gathering bringing together founders, investors, and ecosystem players to connect, share experiences, and build the future of African tech.',
+    client: 'Norrsken Foundation',
+    website: 'https://www.foundersfriday.co/',
+    attendees: '200-300+',
+    duration: 'Monthly Event',
+    servicesProvided: [
+      'Sound System Setup',
+      'Lighting Installation',
+      'LED Screens',
+      'Cocktail Tables',
+      'Round Tables',
+      'Event Planning',
+    ],
+  },
+  {
+    id: 2,
+    title: 'Jasiri Annual Gathering',
+    category: '2025',
+    location: 'Kigali, Rwanda',
+    date: 'July 2025',
+    image: 'https://images.unsplash.com/photo-1540575467065-25a122532d94?w=800&q=80',
+    description: 'We proudly supported Jasiri in their annual event, bringing together visionaries and change-makers from across Africa.',
+    client: 'Jasiri',
+    website: 'https://jasiri.org/',
+    attendees: '300+',
+    duration: '2 Days',
+    servicesProvided: [
+      'Full Event Production',
+      'Stage Setup',
+      'Lighting Design',
+      'Sound Engineering',
+      'LED Screens',
+      'Decorations',
+      'Manpower',
+    ],
+  },
+  {
+    id: 3,
+    title: 'Mastercard Foundation Scholars Program',
+    category: '2025',
+    location: 'Kigali Convention Centre',
+    date: 'June 2025',
+    image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
+    description: 'A two-day gathering of scholars, partners, and leaders celebrating achievements in education across Africa.',
+    client: 'Mastercard Foundation',
+    website: 'https://mastercardfdn.org/',
+    attendees: '500+',
+    duration: '2 Days',
+    servicesProvided: [
+      'Sound System',
+      'Lighting',
+      'LED Screens',
+      'Cocktail Tables',
+      'Round Tables',
+      'Event Planning',
+      'Smoke Machine',
+    ],
+  },
+  {
+    id: 4,
+    title: 'Zaria Court End of Year Celebration',
+    category: '2025',
+    location: 'Zaria Court, Kigali',
+    date: 'December 20, 2025',
+    image: 'https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=800&q=80',
+    description: 'A luxurious end-of-year celebration at Zaria Court with elegant decor and entertainment.',
+    client: 'Zaria Court',
+    website: 'https://zariacourt.org/',
+    attendees: '150+',
+    duration: '1 Evening',
+    servicesProvided: [
+      'Decorations',
+      'Lighting',
+      'Sound System',
+      'Cocktail Tables',
+      'Round Tables',
+      'Event Planning',
+      'Manpower',
+    ],
+  },
+  {
+    id: 5,
     title: 'Second International Conference on Public Health in Africa',
     category: '2022',
     location: 'Kigali Convention Centre',
     date: 'Dec 13-15, 2022',
     image: './norrsken.png',
-    description: 'A landmark conference bringing together health professionals, policymakers, and researchers from across Africa to discuss public health challenges and solutions.',
+    description: 'A landmark conference bringing together health professionals from across Africa.',
     client: 'African Union',
     attendees: '2,500+',
     duration: '3 Days',
-    services: ['Event Planning', 'Venue Management', 'Technical Production', 'Catering Coordination'],
-    highlights: [
-      'Successfully hosted 2,500+ delegates from 45 countries',
-      'Coordinated 50+ speakers and panel discussions',
-      'Managed simultaneous translation in 4 languages',
-      'Zero technical issues throughout the event',
+    servicesProvided: [
+      'LED Screens',
+      'Sound System',
+      'Lighting',
+      'Event Planning',
+      'Stage Setup',
+      'Manpower',
     ],
   },
   {
-    id: 2,
-    title: 'The 17th IGF: Resilient Internet for a Shared Sustainable Future',
+    id: 6,
+    title: 'The 17th IGF',
     category: '2022',
     location: 'Kigali, Rwanda',
     date: 'Nov 2022',
     image: './3.jpeg',
-    description: 'The Internet Governance Forum brought together stakeholders from government, private sector, and civil society to discuss internet policy and governance.',
+    description: 'Internet Governance Forum bringing together stakeholders from government and private sector.',
     client: 'United Nations',
     attendees: '3,000+',
     duration: '5 Days',
-    services: ['Full Event Production', 'Live Streaming', 'Registration Management', 'Security Coordination'],
-    highlights: [
-      'First hybrid IGF event with both physical and virtual attendance',
-      'Live streamed to 10,000+ online participants',
-      'Managed 100+ workshop sessions',
-      'Coordinated high-level ministerial meetings',
+    servicesProvided: [
+      'Sound System',
+      'Lighting',
+      'LED Screens',
+      'Event Planning',
+      'Manpower',
     ],
   },
   {
-    id: 3,
-    title: 'Rwanda Tourism Week: Boosting Intra-Africa Travel',
+    id: 7,
+    title: 'Rwanda Tourism Week',
     category: '2022',
     location: 'Various Locations',
     date: '2022',
     image: './volcano.png',
-    description: 'A week-long celebration of Rwandan tourism featuring exhibitions, fam trips, and networking events for tourism professionals.',
+    description: 'A week-long celebration of Rwandan tourism featuring exhibitions and networking events.',
     client: 'Rwanda Development Board',
     attendees: '1,500+',
     duration: '7 Days',
-    services: ['Tour Coordination', 'Exhibition Management', 'Transportation', 'Accommodation Booking'],
-    highlights: [
-      'Organized tours to 5 national parks',
-      'Hosted 200+ international tour operators',
-      'Facilitated 50+ B2B meetings',
-      'Generated $2M in tourism partnerships',
+    servicesProvided: [
+      'Event Planning',
+      'Decorations',
+      'Sound System',
+      'Lighting',
+      'Cocktail Tables',
+      'Round Tables',
     ],
   },
   {
-    id: 4,
+    id: 8,
     title: 'Basketball Africa League 2021',
     category: '2021',
     location: 'Kigali Arena',
     date: 'May 2021',
     image: 'https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80',
-    description: 'The inaugural season of the Basketball Africa League, featuring top teams from across the continent competing for the championship.',
+    description: 'The inaugural season of the Basketball Africa League.',
     client: 'NBA Africa',
     attendees: '5,000+',
     duration: '2 Weeks',
-    services: ['Venue Setup', 'Broadcast Support', 'VIP Hospitality', 'Security Management'],
-    highlights: [
-      'First-ever BAL championship event',
-      'Broadcast to 215 countries',
-      'Hosted NBA legends and celebrities',
-      '100% venue capacity utilization',
+    servicesProvided: [
+      'LED Screens',
+      'Sound System',
+      'Lighting',
+      'Event Planning',
+      'Manpower',
     ],
   },
   {
-    id: 5,
+    id: 9,
     title: 'AU-EU Foreign Affairs Ministerial Meeting',
     category: '2021',
     location: 'Kigali Convention Centre',
     date: 'Oct 2021',
     image: 'https://images.unsplash.com/photo-1558008258-3256797b43f3?w=800&q=80',
-    description: 'High-level diplomatic meeting between African Union and European Union foreign affairs ministers discussing bilateral relations.',
+    description: 'High-level diplomatic meeting between African Union and European Union ministers.',
     client: 'Ministry of Foreign Affairs',
     attendees: '100+ Ministers',
     duration: '2 Days',
-    services: ['Protocol Management', 'Translation Services', 'Security', 'Catering'],
-    highlights: [
-      'Managed protocol for 50+ ministers',
-      'Provided simultaneous translation',
-      'Ensured zero security incidents',
-      'Received commendation from both AU and EU',
+    servicesProvided: [
+      'LED Screens',
+      'Sound System',
+      'Lighting',
+      'Event Planning',
+      'Round Tables',
     ],
   },
   {
-    id: 6,
+    id: 10,
     title: 'Kigali International Peace Marathon',
     category: '2023',
     location: 'Kigali, Rwanda',
     date: 'May 2023',
     image: 'https://images.unsplash.com/photo-1452626038306-9aae5e071dd3?w=800&q=80',
-    description: 'Annual marathon event promoting peace and unity through sports, attracting runners from around the world.',
+    description: 'Annual marathon event promoting peace and unity through sports.',
     client: 'Kigali City',
     attendees: '10,000+ Runners',
     duration: '1 Day',
-    services: ['Route Planning', 'Participant Management', 'Medical Support', 'Entertainment'],
-    highlights: [
-      'Largest marathon in East Africa',
-      'Participants from 40+ countries',
-      'Raised $500K for peace initiatives',
-      'Zero medical emergencies',
+    servicesProvided: [
+      'Sound System',
+      'Event Planning',
+      'Manpower',
+      'Stage Setup',
     ],
+  },
+];
+
+// Cars Fleet
+const cars = [
+  {
+    id: 101,
+    title: 'Toyota RAV4',
+    category: 'SUV',
+    location: 'Kigali',
+    features: '5 seats • AC • GPS • Bluetooth',
+    image: 'https://images.unsplash.com/photo-1581540222194-0def2dda95b8?w=800&q=80',
+    description: 'Luxury SUV, perfect for family trips and business travel.',
+    price: '$85/day',
+    transmission: 'Automatic',
+    fuel: 'Petrol',
+    mileage: 'Unlimited',
+  },
+  {
+    id: 102,
+    title: 'Mercedes C300',
+    category: 'Sedan',
+    location: 'Kigali',
+    features: 'Leather seats • Sunroof • Premium sound',
+    image: 'https://images.unsplash.com/photo-1617654112368-307921291f42?w=800&q=80',
+    description: 'Executive sedan for business travel.',
+    price: '$120/day',
+    transmission: 'Automatic',
+    fuel: 'Petrol',
+    mileage: 'Unlimited',
+  },
+  {
+    id: 103,
+    title: 'Toyota Land Cruiser Prado',
+    category: 'SUV',
+    location: 'Kigali',
+    features: '7 seats • 4WD • AC',
+    image: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800&q=80',
+    description: 'Perfect for safari and off-road adventures.',
+    price: '$150/day',
+    transmission: 'Automatic',
+    fuel: 'Diesel',
+    mileage: 'Unlimited',
+  },
+  {
+    id: 104,
+    title: 'Coaster Bus',
+    category: 'Bus',
+    location: 'Kigali',
+    features: '25 seats • AC • Luggage space',
+    image: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80',
+    description: 'Perfect for group travel and corporate outings.',
+    price: '$250/day',
+    transmission: 'Manual',
+    fuel: 'Diesel',
+    mileage: 'Limited',
+  },
+  {
+    id: 105,
+    title: 'Hyundai Tucson',
+    category: 'SUV',
+    location: 'Kigali',
+    features: '5 seats • Fuel efficient • Bluetooth',
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&q=80',
+    description: 'Economy SUV, great value for money.',
+    price: '$70/day',
+    transmission: 'Automatic',
+    fuel: 'Petrol',
+    mileage: 'Unlimited',
+  },
+  {
+    id: 106,
+    title: 'Range Rover Velar',
+    category: 'Luxury SUV',
+    location: 'Kigali',
+    features: 'Luxury interior • Panoramic roof',
+    image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=800&q=80',
+    description: 'Ultimate luxury SUV for discerning clients.',
+    price: '$200/day',
+    transmission: 'Automatic',
+    fuel: 'Petrol',
+    mileage: 'Unlimited',
+  },
+];
+
+// Tourism Destinations
+const tourism = [
+  {
+    id: 201,
+    title: 'Volcanoes National Park',
+    category: 'National Park',
+    location: 'Musanze',
+    bestTime: 'June - September',
+    image: 'https://images.unsplash.com/photo-1560419015-7c427e8ae5ba?w=800&q=80',
+    description: 'Home to the endangered mountain gorillas, offering gorilla trekking experiences.',
+    activities: ['Gorilla Trekking', 'Hiking', 'Bird Watching'],
+    duration: 'Full day',
+    bestSeason: 'June to September',
+  },
+  {
+    id: 202,
+    title: 'Nyungwe National Park',
+    category: 'National Park',
+    location: 'Southwest Rwanda',
+    bestTime: 'Year-round',
+    image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80',
+    description: 'One of Africa\'s oldest montane rainforests with canopy walk.',
+    activities: ['Canopy Walk', 'Chimpanzee Tracking', 'Hiking'],
+    duration: '1-2 days',
+    bestSeason: 'Year-round',
+  },
+  {
+    id: 203,
+    title: 'Akagera National Park',
+    category: 'National Park',
+    location: 'Eastern Province',
+    bestTime: 'June - September',
+    image: 'https://images.unsplash.com/photo-1547471080-7cc2caa01c7e?w=800&q=80',
+    description: 'Rwanda\'s Big Five safari destination with diverse wildlife.',
+    activities: ['Game Drives', 'Boat Safaris', 'Bird Watching'],
+    duration: '1-2 days',
+    bestSeason: 'June to September',
+  },
+  {
+    id: 204,
+    title: 'Lake Kivu',
+    category: 'Lake',
+    location: 'Western Province',
+    bestTime: 'Year-round',
+    image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=800&q=80',
+    description: 'Beautiful lake with stunning beaches and island excursions.',
+    activities: ['Boat Rides', 'Kayaking', 'Beach Relaxation'],
+    duration: '2-3 days',
+    bestSeason: 'Year-round',
+  },
+  {
+    id: 205,
+    title: 'Lake Muhazi',
+    category: 'Lake',
+    location: 'Eastern Province',
+    bestTime: 'Year-round',
+    image: 'https://images.unsplash.com/photo-1578852318182-1c3dd2e9e8b0?w=800&q=80',
+    description: 'Serene lake perfect for weekend getaways.',
+    activities: ['Boating', 'Fishing', 'Picnics'],
+    duration: '1 day',
+    bestSeason: 'Year-round',
+  },
+  {
+    id: 206,
+    title: 'Nyanza King\'s Palace Museum',
+    category: 'Museum',
+    location: 'Nyanza',
+    bestTime: 'Year-round',
+    image: 'https://images.unsplash.com/photo-1590518637260-5d6ad554f8d9?w=800&q=80',
+    description: 'Traditional royal residence with cultural exhibits.',
+    activities: ['Cultural Tours', 'History Exhibits'],
+    duration: '2-3 hours',
+    bestSeason: 'Year-round',
+  },
+  {
+    id: 207,
+    title: 'Huye Ethnographic Museum',
+    category: 'Museum',
+    location: 'Huye',
+    bestTime: 'Year-round',
+    image: 'https://images.unsplash.com/photo-1566127992631-137a642a90f4?w=800&q=80',
+    description: 'Premier museum of Rwandan culture with extensive artifacts.',
+    activities: ['Cultural Exhibits', 'Guided Tours'],
+    duration: '2-3 hours',
+    bestSeason: 'Year-round',
   },
 ];
 
 export default function Portfolio() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [hoveredProject, setHoveredProject] = useState<number | null>(null);
-  const [selectedProject, setSelectedProject] = useState<typeof projects[0] | null>(null);
-  const [showAllProjects, setShowAllProjects] = useState(false);
+  const [hoveredItem, setHoveredItem] = useState<number | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  const [selectedCar, setSelectedCar] = useState<typeof cars[0] | null>(null);
+  const [selectedTourism, setSelectedTourism] = useState<typeof tourism[0] | null>(null);
+  const [showAllWorks, setShowAllWorks] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
+  const [returnToAllWorks, setReturnToAllWorks] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -142,6 +405,59 @@ export default function Portfolio() {
 
     return () => observer.disconnect();
   }, []);
+
+  // Combine all items for "All Works" view
+  const allWorks = [
+    ...events.map(event => ({ ...event, type: 'event' })),
+    ...cars.map(car => ({ ...car, type: 'car' })),
+    ...tourism.map(destination => ({ ...destination, type: 'tourism' })),
+  ];
+
+  const filteredWorks = activeTab === 'all' 
+    ? allWorks 
+    : activeTab === 'events' 
+    ? allWorks.filter(item => item.type === 'event')
+    : activeTab === 'cars'
+    ? allWorks.filter(item => item.type === 'car')
+    : allWorks.filter(item => item.type === 'tourism');
+
+  // Handle closing modals - return to appropriate view
+  const handleCloseEvent = () => {
+    setSelectedEvent(null);
+    if (returnToAllWorks) {
+      setShowAllWorks(true);
+      setReturnToAllWorks(false);
+    }
+  };
+
+  const handleCloseCar = () => {
+    setSelectedCar(null);
+    if (returnToAllWorks) {
+      setShowAllWorks(true);
+      setReturnToAllWorks(false);
+    }
+  };
+
+  const handleCloseTourism = () => {
+    setSelectedTourism(null);
+    if (returnToAllWorks) {
+      setShowAllWorks(true);
+      setReturnToAllWorks(false);
+    }
+  };
+
+  // Handle opening from All Works
+  const handleOpenFromAllWorks = (item: any) => {
+    setShowAllWorks(false);
+    setReturnToAllWorks(true);
+    if (item.type === 'event') {
+      setSelectedEvent(item as any);
+    } else if (item.type === 'car') {
+      setSelectedCar(item as any);
+    } else if (item.type === 'tourism') {
+      setSelectedTourism(item as any);
+    }
+  };
 
   return (
     <section
@@ -163,19 +479,19 @@ export default function Portfolio() {
               className="text-[#c9a86c] text-sm font-semibold uppercase tracking-[0.3em] mb-4 block"
               style={{ fontFamily: 'Montserrat, sans-serif' }}
             >
-              Recent
+              Our
             </span>
             <h2
               className="text-4xl md:text-5xl lg:text-6xl font-bold text-black"
               style={{ fontFamily: 'Montserrat, sans-serif' }}
             >
-              Projects
+              Portfolio
             </h2>
             <div className="w-20 h-1 bg-[#c9a86c] rounded-full mt-4" />
           </div>
 
           <button
-            onClick={() => setShowAllProjects(true)}
+            onClick={() => setShowAllWorks(true)}
             className={`mt-6 md:mt-0 inline-flex items-center gap-2 text-black font-semibold text-sm uppercase tracking-wider transition-all duration-300 hover:text-[#c9a86c] group ${
               isVisible
                 ? 'opacity-100 translate-x-0'
@@ -183,17 +499,17 @@ export default function Portfolio() {
             }`}
             style={{ fontFamily: 'Montserrat, sans-serif', transitionDelay: '200ms' }}
           >
-            Show All Works
+            View All Works
             <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
           </button>
         </div>
 
-        {/* Projects Grid */}
+        {/* Featured Projects Grid (First 6) */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {projects.slice(0, 6).map((project, index) => (
+          {events.slice(0, 6).map((project, index) => (
             <div
               key={project.id}
-              onClick={() => setSelectedProject(project)}
+              onClick={() => setSelectedEvent(project)}
               className={`group relative rounded-xl overflow-hidden shadow-lg cursor-pointer transition-all duration-700 ${
                 isVisible
                   ? 'opacity-100 translate-y-0'
@@ -202,12 +518,12 @@ export default function Portfolio() {
               style={{
                 transitionDelay: `${300 + index * 100}ms`,
                 transform:
-                  hoveredProject === project.id
+                  hoveredItem === project.id
                     ? 'translateY(-8px)'
                     : 'translateY(0)',
               }}
-              onMouseEnter={() => setHoveredProject(project.id)}
-              onMouseLeave={() => setHoveredProject(null)}
+              onMouseEnter={() => setHoveredItem(project.id)}
+              onMouseLeave={() => setHoveredItem(null)}
             >
               {/* Image */}
               <div className="aspect-[4/5] relative overflow-hidden">
@@ -278,21 +594,21 @@ export default function Portfolio() {
           }`}
         >
           <button
-            onClick={() => setShowAllProjects(true)}
+            onClick={() => setShowAllWorks(true)}
             className="inline-flex items-center gap-3 border-2 border-black text-black px-8 py-4 font-semibold text-sm uppercase tracking-wider rounded transition-all duration-300 hover:bg-black hover:text-white"
             style={{ fontFamily: 'Montserrat, sans-serif' }}
           >
-            View All Projects
+            View All Works
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Project Detail Modal */}
-      {selectedProject && (
+      {/* Event Detail Modal */}
+      {selectedEvent && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
-          onClick={() => setSelectedProject(null)}
+          onClick={handleCloseEvent}
         >
           <div
             className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden animate-slide-up"
@@ -300,7 +616,7 @@ export default function Portfolio() {
           >
             {/* Close Button */}
             <button
-              onClick={() => setSelectedProject(null)}
+              onClick={handleCloseEvent}
               className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
             >
               <X className="w-5 h-5" />
@@ -311,8 +627,8 @@ export default function Portfolio() {
               {/* Header Image */}
               <div className="relative h-64 md:h-80">
                 <img
-                  src={selectedProject.image}
-                  alt={selectedProject.title}
+                  src={selectedEvent.image}
+                  alt={selectedEvent.title}
                   className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
@@ -320,13 +636,13 @@ export default function Portfolio() {
                   <span
                     className="px-3 py-1 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded mb-3 inline-block"
                   >
-                    {selectedProject.category}
+                    {selectedEvent.category}
                   </span>
                   <h2
                     className="text-2xl md:text-3xl font-bold text-white"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    {selectedProject.title}
+                    {selectedEvent.title}
                   </h2>
                 </div>
               </div>
@@ -338,17 +654,17 @@ export default function Portfolio() {
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <Users className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Attendees</p>
-                    <p className="font-semibold text-black">{selectedProject.attendees}</p>
+                    <p className="font-semibold text-black">{selectedEvent.attendees}</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <Clock className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Duration</p>
-                    <p className="font-semibold text-black">{selectedProject.duration}</p>
+                    <p className="font-semibold text-black">{selectedEvent.duration}</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <MapPin className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Location</p>
-                    <p className="font-semibold text-black">{selectedProject.location}</p>
+                    <p className="font-semibold text-black">{selectedEvent.location}</p>
                   </div>
                 </div>
 
@@ -358,23 +674,33 @@ export default function Portfolio() {
                     className="text-xl font-bold text-black mb-3"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    About This Project
+                    About This Event
                   </h3>
                   <p className="text-gray-600 leading-relaxed">
-                    {selectedProject.description}
+                    {selectedEvent.description}
                   </p>
+                  {selectedEvent.website && (
+                    <a
+                      href={selectedEvent.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-[#c9a86c] hover:text-black transition-colors mt-3"
+                    >
+                      Visit website <ArrowRight className="w-4 h-4" />
+                    </a>
+                  )}
                 </div>
 
-                {/* Services Provided */}
+                {/* Services Provided - YOUR ACTUAL SERVICES */}
                 <div className="mb-8">
                   <h3
                     className="text-xl font-bold text-black mb-3"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    Services Provided
+                    Our Services Provided
                   </h3>
                   <div className="flex flex-wrap gap-2">
-                    {selectedProject.services.map((service, index) => (
+                    {selectedEvent.servicesProvided.map((service, index) => (
                       <span
                         key={index}
                         className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] text-sm font-medium rounded-full"
@@ -385,40 +711,22 @@ export default function Portfolio() {
                   </div>
                 </div>
 
-                {/* Highlights */}
-                <div className="mb-8">
-                  <h3
-                    className="text-xl font-bold text-black mb-3"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Key Highlights
-                  </h3>
-                  <div className="space-y-2">
-                    {selectedProject.highlights.map((highlight, index) => (
-                      <div key={index} className="flex items-start gap-3">
-                        <CheckCircle className="w-5 h-5 text-[#c9a86c] flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-600">{highlight}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Client */}
                 <div className="p-4 bg-gray-50 rounded-lg mb-6">
                   <p className="text-sm text-gray-500">Client</p>
-                  <p className="font-semibold text-black">{selectedProject.client}</p>
+                  <p className="font-semibold text-black">{selectedEvent.client}</p>
                 </div>
 
                 {/* CTA Button */}
                 <button
                   onClick={() => {
-                    setSelectedProject(null);
+                    setSelectedEvent(null);
                     document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
                   }}
                   className="w-full bg-[#c9a86c] text-white px-6 py-4 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-black"
                   style={{ fontFamily: 'Montserrat, sans-serif' }}
                 >
-                  Start Your Project
+                  Inquire About Similar Event
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -427,11 +735,213 @@ export default function Portfolio() {
         </div>
       )}
 
-      {/* All Projects Modal */}
-      {showAllProjects && (
+      {/* Car Detail Modal */}
+      {selectedCar && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
-          onClick={() => setShowAllProjects(false)}
+          onClick={handleCloseCar}
+        >
+          <div
+            className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={handleCloseCar}
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex flex-col md:flex-row">
+              {/* Left - Image */}
+              <div className="md:w-1/2 bg-gray-100">
+                <img
+                  src={selectedCar.image}
+                  alt={selectedCar.title}
+                  className="w-full h-64 md:h-full object-cover"
+                />
+              </div>
+
+              {/* Right - Details */}
+              <div className="md:w-1/2 p-8">
+                <div className="mb-6">
+                  <span className="px-3 py-1 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded inline-block mb-3">
+                    {selectedCar.category}
+                  </span>
+                  <h2
+                    className="text-3xl font-bold text-black mb-2"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    {selectedCar.title}
+                  </h2>
+                  <p className="text-[#c9a86c] font-semibold text-xl">
+                    {selectedCar.price}
+                  </p>
+                </div>
+
+                <p className="text-gray-600 mb-6">
+                  {selectedCar.description}
+                </p>
+
+                <div className="space-y-3 mb-8">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-5 h-5 text-[#c9a86c]" />
+                    <span className="text-gray-600">{selectedCar.features}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Car className="w-5 h-5 text-[#c9a86c]" />
+                    <span className="text-gray-600">Transmission: {selectedCar.transmission}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#c9a86c]" />
+                    <span className="text-gray-600">Fuel: {selectedCar.fuel}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setSelectedCar(null);
+                    document.querySelector('#booking')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full bg-[#c9a86c] text-white px-6 py-4 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-black"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}
+                >
+                  Book This Car
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tourism Detail Modal */}
+      {selectedTourism && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
+          onClick={handleCloseTourism}
+        >
+          <div
+            className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={handleCloseTourism}
+              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* Modal Content - Scrollable */}
+            <div className="overflow-y-auto max-h-[90vh]">
+              {/* Header Image */}
+              <div className="relative h-64 md:h-80">
+                <img
+                  src={selectedTourism.image}
+                  alt={selectedTourism.title}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                <div className="absolute bottom-6 left-6 right-6">
+                  <span
+                    className="px-3 py-1 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded mb-3 inline-block"
+                  >
+                    {selectedTourism.category}
+                  </span>
+                  <h2
+                    className="text-2xl md:text-3xl font-bold text-white"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    {selectedTourism.title}
+                  </h2>
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 md:p-10">
+                {/* Quick Info */}
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <MapPin className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Location</p>
+                    <p className="font-semibold text-black">{selectedTourism.location}</p>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <Clock className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Duration</p>
+                    <p className="font-semibold text-black">{selectedTourism.duration}</p>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <Calendar className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Best Time</p>
+                    <p className="font-semibold text-black">{selectedTourism.bestTime}</p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                <div className="mb-8">
+                  <h3
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    About This Destination
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {selectedTourism.description}
+                  </p>
+                </div>
+
+                {/* Activities */}
+                <div className="mb-8">
+                  <h3
+                    className="text-xl font-bold text-black mb-3"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    Activities
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedTourism.activities.map((activity, index) => (
+                      <span
+                        key={index}
+                        className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] text-sm font-medium rounded-full"
+                      >
+                        {activity}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Best Season */}
+                <div className="p-4 bg-gray-50 rounded-lg mb-6">
+                  <p className="text-sm text-gray-500">Best Season to Visit</p>
+                  <p className="font-semibold text-black">{selectedTourism.bestSeason}</p>
+                </div>
+
+                {/* CTA Button */}
+                <button
+                  onClick={() => {
+                    setSelectedTourism(null);
+                    document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="w-full bg-[#c9a86c] text-white px-6 py-4 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-black"
+                  style={{ fontFamily: 'Montserrat, sans-serif' }}
+                >
+                  Plan Your Visit
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* All Works Modal */}
+      {showAllWorks && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
+          onClick={() => setShowAllWorks(false)}
         >
           <div
             className="relative w-full max-w-6xl max-h-[90vh] bg-white rounded-2xl overflow-hidden animate-slide-up"
@@ -439,7 +949,7 @@ export default function Portfolio() {
           >
             {/* Close Button */}
             <button
-              onClick={() => setShowAllProjects(false)}
+              onClick={() => setShowAllWorks(false)}
               className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
             >
               <X className="w-5 h-5" />
@@ -453,37 +963,83 @@ export default function Portfolio() {
                   className="text-3xl md:text-4xl font-bold text-black"
                   style={{ fontFamily: 'Montserrat, sans-serif' }}
                 >
-                  All Projects
+                  All Works
                 </h2>
                 <p className="text-gray-600 mt-2">
-                  Explore our portfolio of successful events and projects
+                  Explore our portfolio of successful events, premium vehicles, and top destinations
                 </p>
+
+                {/* Tabs */}
+                <div className="flex flex-wrap gap-4 mt-6">
+                  <button
+                    onClick={() => setActiveTab('all')}
+                    className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                      activeTab === 'all'
+                        ? 'bg-[#c9a86c] text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    All
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('events')}
+                    className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                      activeTab === 'events'
+                        ? 'bg-[#c9a86c] text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Events
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('cars')}
+                    className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                      activeTab === 'cars'
+                        ? 'bg-[#c9a86c] text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Cars
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('tourism')}
+                    className={`px-6 py-2 rounded-lg font-semibold transition-all ${
+                      activeTab === 'tourism'
+                        ? 'bg-[#c9a86c] text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    Tourism
+                  </button>
+                </div>
               </div>
 
-              {/* All Projects Grid */}
+              {/* All Works Grid */}
               <div className="p-6 md:p-10">
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {projects.map((project) => (
+                  {filteredWorks.map((item) => (
                     <div
-                      key={project.id}
-                      onClick={() => {
-                        setShowAllProjects(false);
-                        setSelectedProject(project);
-                      }}
+                      key={item.id}
+                      onClick={() => handleOpenFromAllWorks(item)}
                       className="group relative rounded-xl overflow-hidden shadow-lg cursor-pointer"
                     >
                       <div className="aspect-[4/3] relative overflow-hidden">
                         <img
-                          src={project.image}
-                          alt={project.title}
+                          src={item.image}
+                          alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                         
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3 flex gap-2">
                           <span className="px-3 py-1 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded">
-                            {project.category}
+                            {item.type === 'event' ? item.category : item.type === 'car' ? item.category : item.category}
                           </span>
+                          {item.type === 'car' && (
+                            <span className="px-3 py-1 bg-blue-500 text-white text-xs font-semibold uppercase tracking-wider rounded">
+                              {item.price}
+                            </span>
+                          )}
                         </div>
 
                         <div className="absolute inset-x-0 bottom-0 p-4">
@@ -491,9 +1047,22 @@ export default function Portfolio() {
                             className="text-lg font-bold text-white line-clamp-2"
                             style={{ fontFamily: 'Montserrat, sans-serif' }}
                           >
-                            {project.title}
+                            {item.title}
                           </h3>
-                          <p className="text-white/70 text-sm mt-1">{project.location}</p>
+                          <p className="text-white/70 text-sm mt-1">
+                            {item.type === 'event' 
+                              ? item.location 
+                              : item.type === 'car' 
+                              ? item.features 
+                              : item.location}
+                          </p>
+                        </div>
+
+                        {/* Type Indicator */}
+                        <div className="absolute top-3 right-3">
+                          {item.type === 'event' && <Briefcase className="w-5 h-5 text-white" />}
+                          {item.type === 'car' && <Car className="w-5 h-5 text-white" />}
+                          {item.type === 'tourism' && <Mountain className="w-5 h-5 text-white" />}
                         </div>
                       </div>
                     </div>
