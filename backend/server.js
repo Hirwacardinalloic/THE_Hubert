@@ -1,63 +1,68 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const dotenv = require('dotenv');
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import db from './db.js';
 
-// Load environment variables
+// Import routes
+import authRoutes from './routes/auth.js';
+import eventsRoutes from './routes/events.js';
+import carsRoutes from './routes/cars.js';
+import tourismRoutes from './routes/tourism.js';
+import partnersRoutes from './routes/partners.js';
+import staffRoutes from './routes/staff.js';
+import bookingsRoutes from './routes/bookings.js';
+import dashboardRoutes from './routes/dashboard.js';
+
 dotenv.config();
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// Static files for uploads
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
-
-// Database initialization
-const db = require('./database/db');
+// Request logging
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
+  next();
+});
 
 // Routes
-const authRoutes = require('./routes/auth');
-const eventRoutes = require('./routes/events');
-const carRoutes = require('./routes/cars');
-const tourRoutes = require('./routes/tours');
-const bookingRoutes = require('./routes/bookings');
-const contactRoutes = require('./routes/contact');
-const dashboardRoutes = require('./routes/dashboard');
-
-// API Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/events', eventRoutes);
-app.use('/api/cars', carRoutes);
-app.use('/api/tours', tourRoutes);
-app.use('/api/bookings', bookingRoutes);
-app.use('/api/contact', contactRoutes);
+app.use('/api/events', eventsRoutes);
+app.use('/api/cars', carsRoutes);
+app.use('/api/tourism', tourismRoutes);
+app.use('/api/partners', partnersRoutes);
+app.use('/api/staff', staffRoutes);
+app.use('/api/bookings', bookingsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
-// Health check endpoint
+// Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' });
+  res.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Server error:', err);
   res.status(500).json({ 
-    success: false, 
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    error: 'Internal server error',
+    message: err.message 
   });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API available at http://localhost:${PORT}/api`);
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route not found' });
 });
 
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`✅ API available at http://localhost:${PORT}/api`);
+  console.log(`✅ Environment: ${process.env.NODE_ENV || 'development'}`);
+});

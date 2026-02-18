@@ -1,131 +1,74 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const router = express.Router();
-const db = require('../database/db');
-const { generateToken, authenticateToken } = require('../middleware/auth');
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import db from '../db.js';
 
-// Login route
+const router = express.Router();
+
+// POST login
 router.post('/login', async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!username || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide username and password'
-      });
-    }
+    console.log('🔍 Login attempt for:', email);
 
-    // Find user by username
-    const user = await db.getAsync(
-      'SELECT * FROM users WHERE username = ? OR email = ?',
-      [username, username]
+    // Check in admin_users table
+    const admin = await db.getAsync(
+      'SELECT * FROM admin_users WHERE email = ?',
+      [email]
     );
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
+    if (!admin) {
+      console.log('❌ User not found');
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Verify password
-    const isValidPassword = bcrypt.compareSync(password, user.password);
+    console.log('✅ User found:', admin.email);
 
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid credentials'
-      });
+    // Compare password with password_hash
+    const isValid = bcrypt.compareSync(password, admin.password_hash);
+
+    if (!isValid) {
+      console.log('❌ Invalid password');
+      return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate token
-    const token = generateToken(user);
+    console.log('✅ Password valid');
+
+    // Update last login
+    await db.runAsync(
+      'UPDATE admin_users SET last_login = CURRENT_TIMESTAMP WHERE id = ?',
+      [admin.id]
+    );
 
     res.json({
       success: true,
-      message: 'Login successful',
-      data: {
-        token,
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role
-        }
+      user: {
+        id: admin.id,
+        username: admin.username,
+        email: admin.email,
+        role: admin.role
       }
     });
+
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error during login'
-    });
+    console.error('❌ Login error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Verify token route
-router.get('/verify', authenticateToken, (req, res) => {
-  res.json({
-    success: true,
-    message: 'Token is valid',
-    data: { user: req.user }
-  });
+// POST logout
+router.post('/logout', (req, res) => {
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
-// Change password route
-router.post('/change-password', authenticateToken, async (req, res) => {
+// GET current user
+router.get('/me', async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const userId = req.user.id;
-
-    if (!currentPassword || !newPassword) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide current and new password'
-      });
-    }
-
-    // Get user
-    const user = await db.getAsync('SELECT * FROM users WHERE id = ?', [userId]);
-
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
-    }
-
-    // Verify current password
-    const isValidPassword = bcrypt.compareSync(currentPassword, user.password);
-
-    if (!isValidPassword) {
-      return res.status(401).json({
-        success: false,
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Hash new password
-    const hashedPassword = bcrypt.hashSync(newPassword, 10);
-
-    // Update password
-    await db.runAsync(
-      'UPDATE users SET password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [hashedPassword, userId]
-    );
-
-    res.json({
-      success: true,
-      message: 'Password changed successfully'
-    });
+    // For simplicity, you can add token auth later
+    res.json({ user: null });
   } catch (error) {
-    console.error('Change password error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while changing password'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
+export default router;

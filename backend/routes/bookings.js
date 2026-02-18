@@ -1,224 +1,240 @@
-const express = require('express');
-const router = express.Router();
-const db = require('../database/db');
-const { authenticateToken } = require('../middleware/auth');
+import express from 'express';
+import db from '../db.js';
 
-// Get all bookings (protected - admin only)
-router.get('/', authenticateToken, async (req, res) => {
+const router = express.Router();
+
+// GET all bookings with filters
+router.get('/', async (req, res) => {
   try {
-    const { status, booking_type, limit } = req.query;
-    let query = 'SELECT * FROM bookings WHERE 1=1';
+    const { status, type, startDate, endDate, customerId } = req.query;
+    let sql = `
+      SELECT 
+        b.*,
+        c.name as customerName,
+        c.email as customerEmail,
+        c.phone as customerPhone,
+        s.name as serviceName,
+        s.type as serviceType
+      FROM bookings b
+      LEFT JOIN customers c ON b.customerId = c.id
+      LEFT JOIN services s ON b.serviceId = s.id
+      WHERE 1=1
+    `;
     const params = [];
 
     if (status) {
-      query += ' AND status = ?';
+      sql += ' AND b.status = ?';
       params.push(status);
     }
-
-    if (booking_type) {
-      query += ' AND booking_type = ?';
-      params.push(booking_type);
+    if (type) {
+      sql += ' AND s.type = ?';
+      params.push(type);
+    }
+    if (startDate) {
+      sql += ' AND b.createdAt >= ?';
+      params.push(startDate);
+    }
+    if (endDate) {
+      sql += ' AND b.createdAt <= ?';
+      params.push(endDate);
+    }
+    if (customerId) {
+      sql += ' AND b.customerId = ?';
+      params.push(customerId);
     }
 
-    query += ' ORDER BY created_at DESC';
-
-    if (limit) {
-      query += ' LIMIT ?';
-      params.push(parseInt(limit));
-    }
-
-    const bookings = await db.allAsync(query, params);
-
-    res.json({
-      success: true,
-      count: bookings.length,
-      data: bookings
-    });
+    sql += ' ORDER BY b.createdAt DESC';
+    const bookings = await db.allAsync(sql, params);
+    res.json(bookings);
   } catch (error) {
-    console.error('Get bookings error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching bookings'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get single booking by ID (protected)
-router.get('/:id', authenticateToken, async (req, res) => {
+// GET single booking
+router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const booking = await db.getAsync('SELECT * FROM bookings WHERE id = ?', [id]);
-
+    const booking = await db.getAsync(`
+      SELECT 
+        b.*,
+        c.name as customerName,
+        c.email as customerEmail,
+        c.phone as customerPhone,
+        s.name as serviceName,
+        s.type as serviceType,
+        s.price as servicePrice
+      FROM bookings b
+      LEFT JOIN customers c ON b.customerId = c.id
+      LEFT JOIN services s ON b.serviceId = s.id
+      WHERE b.id = ?
+    `, [req.params.id]);
+    
     if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Booking not found'
-      });
+      return res.status(404).json({ error: 'Booking not found' });
     }
-
-    res.json({
-      success: true,
-      data: booking
-    });
+    res.json(booking);
   } catch (error) {
-    console.error('Get booking error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching booking'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Create new booking (public)
+// POST create booking
 router.post('/', async (req, res) => {
   try {
     const {
-      booking_type,
-      service_id,
-      customer_name,
-      customer_email,
-      customer_phone,
-      booking_date,
-      start_date,
-      end_date,
-      number_of_guests,
-      message
+      customerId, serviceId, startDate, endDate,
+      eventDate, guests, totalPrice, status,
+      paymentStatus, notes
     } = req.body;
 
-    if (!booking_type || !customer_name || !customer_email) {
-      return res.status(400).json({
-        success: false,
-        message: 'Booking type, customer name, and email are required'
-      });
-    }
+    // Generate booking number
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const count = await db.getAsync(
+      "SELECT COUNT(*) as count FROM bookings WHERE strftime('%Y-%m', createdAt) = strftime('%Y-%m', 'now')"
+    );
+    const bookingNumber = `BK-${year}${month}-${(count.count + 1).toString().padStart(4, '0')}`;
 
     const result = await db.runAsync(
-      `INSERT INTO bookings (booking_type, service_id, customer_name, customer_email, customer_phone, booking_date, start_date, end_date, number_of_guests, message)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [booking_type, service_id, customer_name, customer_email, customer_phone, booking_date, start_date, end_date, number_of_guests, message]
-    );
-
-    // Here you could integrate WhatsApp API notification
-    // For now, we'll just mark it as pending notification
-
-    res.status(201).json({
-      success: true,
-      message: 'Booking created successfully. We will contact you soon!',
-      data: { id: result.id }
-    });
-  } catch (error) {
-    console.error('Create booking error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while creating booking'
-    });
-  }
-});
-
-// Update booking status (protected)
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      status,
-      total_amount,
-      whatsapp_notified
-    } = req.body;
-
-    const booking = await db.getAsync('SELECT * FROM bookings WHERE id = ?', [id]);
-
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Booking not found'
-      });
-    }
-
-    await db.runAsync(
-      `UPDATE bookings 
-       SET status = ?, total_amount = ?, whatsapp_notified = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
+      `INSERT INTO bookings (
+        bookingNumber, customerId, serviceId, startDate, endDate,
+        eventDate, guests, totalPrice, status, paymentStatus,
+        notes, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       [
-        status || booking.status,
-        total_amount || booking.total_amount,
-        whatsapp_notified !== undefined ? whatsapp_notified : booking.whatsapp_notified,
-        id
+        bookingNumber, customerId, serviceId, startDate, endDate,
+        eventDate, guests || 1, totalPrice || 0, status || 'pending',
+        paymentStatus || 'unpaid', notes
       ]
     );
 
-    res.json({
-      success: true,
+    res.json({ 
+      success: true, 
+      id: result.id,
+      bookingNumber,
+      message: 'Booking created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT update booking
+router.put('/:id', async (req, res) => {
+  try {
+    const {
+      customerId, serviceId, startDate, endDate,
+      eventDate, guests, totalPrice, status,
+      paymentStatus, notes
+    } = req.body;
+
+    await db.runAsync(
+      `UPDATE bookings SET
+        customerId = ?, serviceId = ?, startDate = ?, endDate = ?, eventDate = ?,
+        guests = ?, totalPrice = ?, status = ?, paymentStatus = ?, notes = ?,
+        updatedAt = CURRENT_TIMESTAMP
+      WHERE id = ?`,
+      [
+        customerId, serviceId, startDate, endDate, eventDate,
+        guests, totalPrice, status, paymentStatus, notes,
+        req.params.id
+      ]
+    );
+
+    res.json({ 
+      success: true, 
       message: 'Booking updated successfully'
     });
   } catch (error) {
-    console.error('Update booking error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while updating booking'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Delete booking (protected)
-router.delete('/:id', authenticateToken, async (req, res) => {
+// DELETE booking
+router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const booking = await db.getAsync('SELECT * FROM bookings WHERE id = ?', [id]);
-
-    if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Booking not found'
-      });
-    }
-
-    await db.runAsync('DELETE FROM bookings WHERE id = ?', [id]);
-
-    res.json({
-      success: true,
+    await db.runAsync('DELETE FROM bookings WHERE id = ?', [req.params.id]);
+    res.json({ 
+      success: true, 
       message: 'Booking deleted successfully'
     });
   } catch (error) {
-    console.error('Delete booking error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while deleting booking'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get booking statistics (protected)
-router.get('/stats/overview', authenticateToken, async (req, res) => {
+// PATCH update booking status
+router.patch('/:id/status', async (req, res) => {
   try {
-    const totalBookings = await db.getAsync('SELECT COUNT(*) as count FROM bookings');
-    const pendingBookings = await db.getAsync('SELECT COUNT(*) as count FROM bookings WHERE status = "pending"');
-    const confirmedBookings = await db.getAsync('SELECT COUNT(*) as count FROM bookings WHERE status = "confirmed"');
-    const completedBookings = await db.getAsync('SELECT COUNT(*) as count FROM bookings WHERE status = "completed"');
+    const { status } = req.body;
+    
+    await db.runAsync(
+      'UPDATE bookings SET status = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
+      [status, req.params.id]
+    );
 
-    const bookingsByType = await db.allAsync(`
-      SELECT booking_type, COUNT(*) as count 
-      FROM bookings 
-      GROUP BY booking_type
+    res.json({ 
+      success: true, 
+      message: 'Booking status updated successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PATCH update payment status
+router.patch('/:id/payment', async (req, res) => {
+  try {
+    const { paymentStatus } = req.body;
+    
+    await db.runAsync(
+      'UPDATE bookings SET paymentStatus = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
+      [paymentStatus, req.params.id]
+    );
+
+    res.json({ 
+      success: true, 
+      message: 'Payment status updated successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET bookings stats
+router.get('/stats/summary', async (req, res) => {
+  try {
+    const total = await db.getAsync('SELECT COUNT(*) as count FROM bookings');
+    const pending = await db.getAsync("SELECT COUNT(*) as count FROM bookings WHERE status = 'pending'");
+    const confirmed = await db.getAsync("SELECT COUNT(*) as count FROM bookings WHERE status = 'confirmed'");
+    const completed = await db.getAsync("SELECT COUNT(*) as count FROM bookings WHERE status = 'completed'");
+    const cancelled = await db.getAsync("SELECT COUNT(*) as count FROM bookings WHERE status = 'cancelled'");
+    
+    const revenue = await db.getAsync(`
+      SELECT SUM(totalPrice) as total FROM bookings 
+      WHERE status IN ('confirmed', 'completed') AND paymentStatus = 'paid'
+    `);
+    
+    const pendingRevenue = await db.getAsync(`
+      SELECT SUM(totalPrice) as total FROM bookings 
+      WHERE status = 'pending'
     `);
 
     res.json({
-      success: true,
-      data: {
-        total: totalBookings.count,
-        pending: pendingBookings.count,
-        confirmed: confirmedBookings.count,
-        completed: completedBookings.count,
-        byType: bookingsByType
-      }
+      counts: {
+        total: total.count,
+        pending: pending.count,
+        confirmed: confirmed.count,
+        completed: completed.count,
+        cancelled: cancelled.count
+      },
+      revenue: revenue.total || 0,
+      pendingRevenue: pendingRevenue.total || 0
     });
   } catch (error) {
-    console.error('Get booking stats error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching booking statistics'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
+export default router;

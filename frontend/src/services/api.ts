@@ -33,16 +33,20 @@ api.interceptors.response.use(
   }
 );
 
-// Auth API
+// ============================================
+// AUTH API - FIXED
+// ============================================
 export const authAPI = {
-  login: (username: string, password: string) =>
-    api.post('/auth/login', { username, password }),
+  login: (email: string, password: string) =>    // ✅ Changed from username to email
+    api.post('/auth/login', { email, password }), // ✅ Now sends email
   verify: () => api.get('/auth/verify'),
   changePassword: (currentPassword: string, newPassword: string) =>
     api.post('/auth/change-password', { currentPassword, newPassword }),
 };
 
-// Events API
+// ============================================
+// EVENTS API
+// ============================================
 export const eventsAPI = {
   getAll: (params?: { featured?: boolean; limit?: number; category?: string }) =>
     api.get('/events', { params }),
@@ -52,7 +56,9 @@ export const eventsAPI = {
   delete: (id: number) => api.delete(`/events/${id}`),
 };
 
-// Cars API
+// ============================================
+// CARS API
+// ============================================
 export const carsAPI = {
   getAll: (params?: { type?: string; status?: string; limit?: number; minPrice?: number; maxPrice?: number }) =>
     api.get('/cars', { params }),
@@ -62,7 +68,9 @@ export const carsAPI = {
   delete: (id: number) => api.delete(`/cars/${id}`),
 };
 
-// Tours API
+// ============================================
+// TOURS API
+// ============================================
 export const toursAPI = {
   getAll: (params?: { featured?: boolean; limit?: number; destination?: string; minPrice?: number; maxPrice?: number }) =>
     api.get('/tours', { params }),
@@ -72,7 +80,9 @@ export const toursAPI = {
   delete: (id: number) => api.delete(`/tours/${id}`),
 };
 
-// Bookings API
+// ============================================
+// BOOKINGS API
+// ============================================
 export const bookingsAPI = {
   getAll: (params?: { status?: string; booking_type?: string; limit?: number }) =>
     api.get('/bookings', { params }),
@@ -83,7 +93,9 @@ export const bookingsAPI = {
   getStats: () => api.get('/bookings/stats/overview'),
 };
 
-// Contact API
+// ============================================
+// CONTACT API
+// ============================================
 export const contactAPI = {
   submit: (data: object) => api.post('/contact', data),
   getAll: (params?: { status?: string; limit?: number }) =>
@@ -94,10 +106,48 @@ export const contactAPI = {
   getUnreadCount: () => api.get('/contact/stats/unread'),
 };
 
-// Dashboard API
+// ============================================
+// DASHBOARD API
+// ============================================
 export const dashboardAPI = {
   getStats: () => api.get('/dashboard/stats'),
   getActivity: (limit?: number) => api.get('/dashboard/activity', { params: { limit } }),
+};
+
+// ============================================
+// STAFF API (ADD THIS IF YOU NEED IT)
+// ============================================
+export const staffAPI = {
+  getAll: (params?: { status?: string }) =>
+    api.get('/staff', { params }),
+  getById: (id: number) => api.get(`/staff/${id}`),
+  create: (data: object) => api.post('/staff', data),
+  update: (id: number, data: object) => api.put(`/staff/${id}`, data),
+  delete: (id: number) => api.delete(`/staff/${id}`),
+};
+
+// ============================================
+// PARTNERS API (ADD THIS IF YOU NEED IT)
+// ============================================
+export const partnersAPI = {
+  getAll: (params?: { status?: string }) =>
+    api.get('/partners', { params }),
+  getById: (id: number) => api.get(`/partners/${id}`),
+  create: (data: object) => api.post('/partners', data),
+  update: (id: number, data: object) => api.put(`/partners/${id}`, data),
+  delete: (id: number) => api.delete(`/partners/${id}`),
+};
+
+// ============================================
+// TOURISM API (ADD THIS IF YOU NEED IT)
+// ============================================
+export const tourismAPI = {
+  getAll: (params?: { status?: string; category?: string }) =>
+    api.get('/tourism', { params }),
+  getById: (id: number) => api.get(`/tourism/${id}`),
+  create: (data: object) => api.post('/tourism', data),
+  update: (id: number, data: object) => api.put(`/tourism/${id}`, data),
+  delete: (id: number) => api.delete(`/tourism/${id}`),
 };
 
 export default api;

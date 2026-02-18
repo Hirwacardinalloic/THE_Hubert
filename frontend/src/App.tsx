@@ -19,19 +19,40 @@ import AdminLayout from './admin/Layout';
 import AdminDashboard from './admin/Dashboard';
 import AdminBookings from './admin/Bookings';
 
+// Import all new admin pages
+import EventsList from './admin/events/eventsList';
+import EventForm from './admin/events/EventForm';
+import EventDetail from './admin/events/EventDetail';
+
+import CarsList from './admin/cars/CarsList';
+import CarForm from './admin/cars/CarForm';
+import CarDetail from './admin/cars/CarDetail';
+
+import TourismList from './admin/tourism/TourismList';
+import TourismForm from './admin/tourism/TourismForm';
+import TourismDetail from './admin/tourism/TourismDetail';
+
+import PartnersList from './admin/partners/PartnersList';
+import PartnerForm from './admin/partners/PartnerForm';
+
+import StaffList from './admin/staff/StaffList';
+import StaffForm from './admin/staff/StaffForm';
+
+import Settings from './admin/settings/Settings';
+
 // Protected Route Component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#f9dc4a] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-[#c9a86c] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/admin/login" replace />;
   }
 
@@ -48,8 +69,8 @@ function PublicLayout() {
         <About />
         <Services />
         <Portfolio />
-        <Staff /> 
-        <Partners />        
+        <Staff />
+        <Partners />
         <Booking />
         <Contact />
       </main>
@@ -80,10 +101,37 @@ function App() {
             <Route index element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="dashboard" element={<AdminDashboard />} />
             <Route path="bookings" element={<AdminBookings />} />
-            <Route path="events" element={<div className="p-8 text-center text-gray-500">Events management coming soon</div>} />
-            <Route path="cars" element={<div className="p-8 text-center text-gray-500">Cars management coming soon</div>} />
-            <Route path="tours" element={<div className="p-8 text-center text-gray-500">Tours management coming soon</div>} />
-            <Route path="messages" element={<div className="p-8 text-center text-gray-500">Messages management coming soon</div>} />
+            
+            {/* Events */}
+            <Route path="events" element={<EventsList />} />
+            <Route path="events/new" element={<EventForm />} />
+            <Route path="events/:id" element={<EventDetail />} />
+            <Route path="events/:id/edit" element={<EventForm />} />
+            
+            {/* Cars */}
+            <Route path="cars" element={<CarsList />} />
+            <Route path="cars/new" element={<CarForm />} />
+            <Route path="cars/:id" element={<CarDetail />} />
+            <Route path="cars/:id/edit" element={<CarForm />} />
+            
+            {/* Tourism */}
+            <Route path="tourism" element={<TourismList />} />
+            <Route path="tourism/new" element={<TourismForm />} />
+            <Route path="tourism/:id" element={<TourismDetail />} />
+            <Route path="tourism/:id/edit" element={<TourismForm />} />
+            
+            {/* Partners */}
+            <Route path="partners" element={<PartnersList />} />
+            <Route path="partners/new" element={<PartnerForm />} />
+            <Route path="partners/:id/edit" element={<PartnerForm />} />
+            
+            {/* Staff */}
+            <Route path="staff" element={<StaffList />} />
+            <Route path="staff/new" element={<StaffForm />} />
+            <Route path="staff/:id/edit" element={<StaffForm />} />
+            
+            {/* Settings */}
+            <Route path="settings" element={<Settings />} />
           </Route>
 
           {/* Catch all */}

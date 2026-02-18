@@ -1,195 +1,146 @@
-const express = require('express');
-const router = express.Router();
-const db = require('../database/db');
-const { authenticateToken } = require('../middleware/auth');
+import express from 'express';
+import db from '../db.js';
 
-// Get all events (public)
+const router = express.Router();
+
+// GET all events
 router.get('/', async (req, res) => {
   try {
-    const { featured, limit, category } = req.query;
-    let query = 'SELECT * FROM events WHERE status = "active"';
+    const { status, category } = req.query;
+    let sql = 'SELECT * FROM events';
     const params = [];
 
-    if (category) {
-      query += ' AND category = ?';
-      params.push(category);
+    if (status || category) {
+      sql += ' WHERE';
+      if (status) {
+        sql += ' status = ?';
+        params.push(status);
+      }
+      if (category) {
+        if (status) sql += ' AND';
+        sql += ' category = ?';
+        params.push(category);
+      }
     }
 
-    if (featured === 'true') {
-      query += ' AND featured = 1';
-    }
-
-    query += ' ORDER BY created_at DESC';
-
-    if (limit) {
-      query += ' LIMIT ?';
-      params.push(parseInt(limit));
-    }
-
-    const events = await db.allAsync(query, params);
-
-    res.json({
-      success: true,
-      count: events.length,
-      data: events
-    });
+    sql += ' ORDER BY created_at DESC';
+    const events = await db.allAsync(sql, params);
+    res.json(events);
   } catch (error) {
-    console.error('Get events error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching events'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Get single event by ID (public)
+// GET single event
 router.get('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const event = await db.getAsync('SELECT * FROM events WHERE id = ? AND status = "active"', [id]);
-
+    const event = await db.getAsync(
+      'SELECT * FROM events WHERE id = ?',
+      [req.params.id]
+    );
     if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
+      return res.status(404).json({ error: 'Event not found' });
     }
-
-    res.json({
-      success: true,
-      data: event
-    });
+    res.json(event);
   } catch (error) {
-    console.error('Get event error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while fetching event'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Create new event (protected)
-router.post('/', authenticateToken, async (req, res) => {
+// POST create event
+router.post('/', async (req, res) => {
   try {
     const {
-      title,
-      description,
-      category,
-      image_url,
-      event_date,
-      location,
-      featured
+      title, category, location, date, description,
+      client, website, attendees, duration, servicesProvided,
+      image, status
     } = req.body;
-
-    if (!title) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title is required'
-      });
-    }
 
     const result = await db.runAsync(
-      `INSERT INTO events (title, description, category, image_url, event_date, location, featured)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [title, description, category, image_url, event_date, location, featured ? 1 : 0]
-    );
-
-    res.status(201).json({
-      success: true,
-      message: 'Event created successfully',
-      data: { id: result.id }
-    });
-  } catch (error) {
-    console.error('Create event error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while creating event'
-    });
-  }
-});
-
-// Update event (protected)
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      title,
-      description,
-      category,
-      image_url,
-      event_date,
-      location,
-      featured,
-      status
-    } = req.body;
-
-    const event = await db.getAsync('SELECT * FROM events WHERE id = ?', [id]);
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
-    }
-
-    await db.runAsync(
-      `UPDATE events 
-       SET title = ?, description = ?, category = ?, image_url = ?, 
-           event_date = ?, location = ?, featured = ?, status = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`,
+      `INSERT INTO events (
+        title, category, location, date, description,
+        client, website, attendees, duration, servicesProvided,
+        image, status, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
       [
-        title || event.title,
-        description || event.description,
-        category || event.category,
-        image_url || event.image_url,
-        event_date || event.event_date,
-        location || event.location,
-        featured !== undefined ? (featured ? 1 : 0) : event.featured,
-        status || event.status,
-        id
+        title, category, location, date, description,
+        client, website, attendees, duration, JSON.stringify(servicesProvided || []),
+        image, status || 'active'
       ]
     );
 
-    res.json({
-      success: true,
+    res.json({ 
+      success: true, 
+      id: result.id,
+      message: 'Event created successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// PUT update event
+router.put('/:id', async (req, res) => {
+  try {
+    const {
+      title, category, location, date, description,
+      client, website, attendees, duration, servicesProvided,
+      image, status
+    } = req.body;
+
+    await db.runAsync(
+      `UPDATE events SET
+        title = ?, category = ?, location = ?, date = ?, description = ?,
+        client = ?, website = ?, attendees = ?, duration = ?, servicesProvided = ?,
+        image = ?, status = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?`,
+      [
+        title, category, location, date, description,
+        client, website, attendees, duration, JSON.stringify(servicesProvided || []),
+        image, status, req.params.id
+      ]
+    );
+
+    res.json({ 
+      success: true, 
       message: 'Event updated successfully'
     });
   } catch (error) {
-    console.error('Update event error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while updating event'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-// Delete event (protected)
-router.delete('/:id', authenticateToken, async (req, res) => {
+// DELETE event
+router.delete('/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const event = await db.getAsync('SELECT * FROM events WHERE id = ?', [id]);
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: 'Event not found'
-      });
-    }
-
-    await db.runAsync('DELETE FROM events WHERE id = ?', [id]);
-
-    res.json({
-      success: true,
+    await db.runAsync('DELETE FROM events WHERE id = ?', [req.params.id]);
+    res.json({ 
+      success: true, 
       message: 'Event deleted successfully'
     });
   } catch (error) {
-    console.error('Delete event error:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Server error while deleting event'
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-module.exports = router;
+// GET events stats
+router.get('/stats/summary', async (req, res) => {
+  try {
+    const total = await db.getAsync('SELECT COUNT(*) as count FROM events');
+    const active = await db.getAsync("SELECT COUNT(*) as count FROM events WHERE status = 'active'");
+    const upcoming = await db.getAsync(`
+      SELECT COUNT(*) as count FROM events 
+      WHERE date >= date('now') AND status = 'active'
+    `);
+    
+    res.json({
+      total: total.count,
+      active: active.count,
+      upcoming: upcoming.count
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+export default router;

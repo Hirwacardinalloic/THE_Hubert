@@ -1,0 +1,394 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Save, ArrowLeft, Upload, Plus, X } from 'lucide-react';
+
+interface TourismFormData {
+  title: string;
+  category: string;
+  location: string;
+  duration: string;
+  bestTime: string;
+  bestSeason: string;
+  description: string;
+  activities: string[];
+  highlights: string[];
+  image: string;
+  status: 'active' | 'inactive';
+}
+
+export default function TourismForm() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const [newActivity, setNewActivity] = useState('');
+  const [newHighlight, setNewHighlight] = useState('');
+  const [formData, setFormData] = useState<TourismFormData>({
+    title: '',
+    category: '',
+    location: '',
+    duration: '',
+    bestTime: '',
+    bestSeason: '',
+    description: '',
+    activities: [],
+    highlights: [],
+    image: '',
+    status: 'active',
+  });
+
+  useEffect(() => {
+    if (id) {
+      fetchTourism();
+    }
+  }, [id]);
+
+  const fetchTourism = async () => {
+    try {
+      const response = await fetch(`/api/tourism/${id}`);
+      const data = await response.json();
+      setFormData(data);
+    } catch (error) {
+      console.error('Failed to fetch destination:', error);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const addActivity = () => {
+    if (newActivity.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        activities: [...prev.activities, newActivity.trim()]
+      }));
+      setNewActivity('');
+    }
+  };
+
+  const removeActivity = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      activities: prev.activities.filter((_, i) => i !== index)
+    }));
+  };
+
+  const addHighlight = () => {
+    if (newHighlight.trim()) {
+      setFormData(prev => ({
+        ...prev,
+        highlights: [...prev.highlights, newHighlight.trim()]
+      }));
+      setNewHighlight('');
+    }
+  };
+
+  const removeHighlight = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      highlights: prev.highlights.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const url = id ? `/api/tourism/${id}` : '/api/tourism';
+      const method = id ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        navigate('/admin/tourism');
+      }
+    } catch (error) {
+      console.error('Failed to save destination:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-4 mb-6">
+        <button
+          onClick={() => navigate('/admin/tourism')}
+          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div>
+          <h1 className="text-3xl font-bold text-black" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+            {id ? 'Edit Destination' : 'Add New Destination'}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {id ? 'Update destination details' : 'Add a new tourism destination'}
+          </p>
+        </div>
+      </div>
+
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-8 space-y-6">
+        {/* Basic Info */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Destination Name *
+            </label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="e.g., Volcanoes National Park"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category *
+            </label>
+            <input
+              type="text"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="e.g., National Park, Lake, Museum"
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Location *
+            </label>
+            <input
+              type="text"
+              name="location"
+              value={formData.location}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="e.g., Musanze, Northern Province"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Duration *
+            </label>
+            <input
+              type="text"
+              name="duration"
+              value={formData.duration}
+              onChange={handleChange}
+              required
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="e.g., Full day, 2-3 days"
+            />
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Best Time to Visit
+            </label>
+            <input
+              type="text"
+              name="bestTime"
+              value={formData.bestTime}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="e.g., June - September"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Best Season
+            </label>
+            <input
+              type="text"
+              name="bestSeason"
+              value={formData.bestSeason}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="e.g., Dry season"
+            />
+          </div>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Description *
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            required
+            rows={4}
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+            placeholder="Describe the destination..."
+          />
+        </div>
+
+        {/* Activities */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Activities
+          </label>
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              value={newActivity}
+              onChange={(e) => setNewActivity(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="Add an activity..."
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addActivity())}
+            />
+            <button
+              type="button"
+              onClick={addActivity}
+              className="px-4 py-2 bg-[#c9a86c] text-white rounded-lg hover:bg-black transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {formData.activities.map((activity, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+              >
+                {activity}
+                <button
+                  type="button"
+                  onClick={() => removeActivity(index)}
+                  className="hover:text-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Highlights */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Highlights
+          </label>
+          <div className="flex gap-2 mb-3">
+            <input
+              type="text"
+              value={newHighlight}
+              onChange={(e) => setNewHighlight(e.target.value)}
+              className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="Add a highlight..."
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addHighlight())}
+            />
+            <button
+              type="button"
+              onClick={addHighlight}
+              className="px-4 py-2 bg-[#c9a86c] text-white rounded-lg hover:bg-black transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {formData.highlights.map((highlight, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+              >
+                {highlight}
+                <button
+                  type="button"
+                  onClick={() => removeHighlight(index)}
+                  className="hover:text-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Image Upload */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Image URL
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              name="image"
+              value={formData.image}
+              onChange={handleChange}
+              className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+              placeholder="https://..."
+            />
+            <button
+              type="button"
+              className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+            >
+              <Upload className="w-5 h-5" />
+              Upload
+            </button>
+          </div>
+        </div>
+
+        {/* Status */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Status
+          </label>
+          <select
+            name="status"
+            value={formData.status}
+            onChange={handleChange}
+            className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        {/* Submit Button */}
+        <div className="flex justify-end gap-4 pt-4">
+          <button
+            type="button"
+            onClick={() => navigate('/admin/tourism')}
+            className="px-6 py-3 border border-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="inline-flex items-center gap-2 bg-[#c9a86c] text-white px-6 py-3 rounded-lg font-semibold hover:bg-black transition-colors disabled:opacity-50"
+          >
+            <Save className="w-5 h-5" />
+            {isLoading ? 'Saving...' : id ? 'Update Destination' : 'Save Destination'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
