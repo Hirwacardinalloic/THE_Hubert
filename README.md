@@ -1,52 +1,47 @@
-THE HURBERT - Official Website
+# THE HURBERT - Official Website
+
 A modern, responsive website for THE HURBERT, a luxury event management and hospitality company based in Kigali, Rwanda.
 
-🚀 Tech Stack
-React 18 - Frontend library
+## 🚀 Tech Stack
 
-TypeScript - Type safety
+- **React 18** - Frontend library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and development server
+- **Tailwind CSS** - Styling
+- **Lucide React** - Icons
 
-Vite - Build tool and development server
-
-Tailwind CSS - Styling
-
-Lucide React - Icons
-
-📋 Project Structure
-text
+## 📋 Project Structure
 src/
-├── sections/           # Main page sections
-│   ├── Header.tsx     # Navigation header
-│   ├── Hero.tsx       # Home/landing section
-│   ├── About.tsx      # Company information
-│   ├── Services.tsx   # Services offered
-│   ├── Portfolio.tsx  # Past work gallery
-│   ├── Staff.tsx      # Team members with modal profiles
-│   ├── Partners.tsx   # Company partners with logos
-│   ├── Booking.tsx    # Booking form with WhatsApp/Email
-│   ├── Contact.tsx    # Contact form with WhatsApp/Email
-│   └── Footer.tsx     # Site footer
-├── App.tsx            # Main component with routing
-└── main.tsx          # Entry point
-✨ Features
-Responsive Design - Works on all devices
+├── sections/ # Main page sections
+│ ├── Header.tsx # Navigation header
+│ ├── Hero.tsx # Home/landing section
+│ ├── About.tsx # Company information
+│ ├── Services.tsx # Services offered
+│ ├── Portfolio.tsx # Past work gallery
+│ ├── Staff.tsx # Team members with modal profiles
+│ ├── Partners.tsx # Company partners with logos
+│ ├── Booking.tsx # Booking form with WhatsApp/Email
+│ ├── Contact.tsx # Contact form with WhatsApp/Email
+│ └── Footer.tsx # Site footer
+├── App.tsx # Main component with routing
+└── main.tsx # Entry point
 
-Smooth Scrolling - Navigation between sections
+text
 
-Interactive UI - Hover effects, modals, animations
+## ✨ Features
 
-Service Details Modal - Click services to see more info
+- **Responsive Design** - Works on all devices
+- **Smooth Scrolling** - Navigation between sections
+- **Interactive UI** - Hover effects, modals, animations
+- **Service Details Modal** - Click services to see more info
+- **Staff Profiles** - Click team members to view full details
+- **Partner Logos** - Display company partners
+- **Booking System** - Form submits to WhatsApp and Gmail
+- **Contact Form** - Direct messaging via WhatsApp and Email
 
-Staff Profiles - Click team members to view full details
+## 🛠️ Development
 
-Partner Logos - Display company partners
-
-Booking System - Form submits to WhatsApp and Gmail
-
-Contact Form - Direct messaging via WhatsApp and Email
-
-🛠️ Development
-bash
+```bash
 # Install dependencies
 npm install
 
