@@ -70,7 +70,7 @@ Phone: 0782169162
 
 WhatsApp: +250782169162
 
-Email: cardinaloichirwa@gmail.com
+Email: thehurbertltd@gmail.com
 
 Address: 1 KN 78 St, Kigali
 
