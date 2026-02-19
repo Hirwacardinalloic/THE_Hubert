@@ -11,7 +11,7 @@ const bookingTypes = [
 const CONTACT_INFO = {
   phone: '0782169162',
   whatsapp: '250782169162',
-  email: 'thehurbertltd@gmail.com',
+  email: 'cardinaloichirwa@gmail.com',
   address: '1 KN 78 St, Kigali',
 };
 
@@ -21,6 +21,7 @@ export default function Booking() {
   const [selectedType, setSelectedType] = useState('event');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [bookingNumber, setBookingNumber] = useState('');
   
   // Store submitted data for WhatsApp/Email
   const [submittedData, setSubmittedData] = useState({
@@ -67,13 +68,13 @@ export default function Booking() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const serviceLabel = bookingTypes.find(t => t.id === selectedType)?.label || 'Booking';
     
-    // ✅ STORE DATA for WhatsApp/Email
+    // Store for email/WhatsApp
     setSubmittedData({
       customer_name: formData.customer_name,
       customer_email: formData.customer_email,
@@ -84,6 +85,83 @@ export default function Booking() {
       message: formData.message,
       service_type: serviceLabel,
     });
+
+    // ========================================
+    // SAVE TO DATABASE - ADMIN DASHBOARD
+    // ========================================
+    // ========================================
+// SAVE TO DATABASE - ADMIN DASHBOARD
+// ========================================
+// ========================================
+// SAVE TO DATABASE - ADMIN DASHBOARD
+// ========================================
+// ========================================
+// SAVE TO DATABASE - ADMIN DASHBOARD
+// ========================================
+try {
+  // First, create or find customer
+  const customerResponse = await fetch('http://localhost:5000/api/customers', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: formData.customer_name,
+      email: formData.customer_email,
+      phone: formData.customer_phone || '',
+      country: 'Rwanda'
+    })
+  });
+  
+  const customerData = await customerResponse.json();
+  const customerId = customerData.id || 1;
+  
+  console.log('✅ Customer ID:', customerId);
+
+  // Map service type to ID
+  const serviceId = selectedType === 'car' ? 2 : 
+                    selectedType === 'tour' ? 3 : 1;
+
+  // Calculate price
+  let totalPrice = 0;
+  if (selectedType === 'car') totalPrice = 85 * (formData.number_of_guests || 1);
+  else if (selectedType === 'tour') totalPrice = 65 * (formData.number_of_guests || 1);
+  else totalPrice = 5000;
+
+  const bookingData = {
+    customerId: customerId,
+    serviceId: serviceId,
+    startDate: formData.start_date || null,
+    endDate: formData.end_date || null,
+    eventDate: selectedType === 'event' ? formData.start_date : null,
+    guests: formData.number_of_guests || 1,
+    totalPrice: totalPrice,
+    status: 'pending',
+    paymentStatus: 'unpaid',
+    notes: formData.message || ''
+  };
+
+  console.log('📤 Sending booking:', bookingData);
+
+  const response = await fetch('http://localhost:5000/api/bookings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(bookingData)
+  });
+
+  const result = await response.json();
+  console.log('📥 Response:', result);
+
+  if (response.ok) {
+    console.log('✅ Booking saved!');
+    if (result.bookingNumber) {
+      setBookingNumber(result.bookingNumber);
+    }
+  } else {
+    console.error('❌ API error:', result);
+  }
+
+} catch (error) {
+  console.error('❌ Error:', error);
+}
 
     setSubmitSuccess(true);
     
@@ -102,8 +180,9 @@ export default function Booking() {
   };
 
   const openWhatsApp = () => {
-    // ✅ Use submittedData directly
     const message = `New Booking Request - THE HURBERT
+
+Booking Reference: ${bookingNumber || 'N/A'}
 
 Service Type: ${submittedData.service_type}
 
@@ -125,9 +204,9 @@ ${submittedData.message || 'No additional message'}`;
   };
 
   const openEmail = () => {
-    // ✅ Use submittedData directly
-    const subject = `New Booking Request - ${submittedData.service_type}`;
+    const subject = `New Booking Request - ${submittedData.service_type}${bookingNumber ? ' - ' + bookingNumber : ''}`;
     const body = `BOOKING REQUEST - ${submittedData.service_type}
+${bookingNumber ? 'Booking Ref: ' + bookingNumber : ''}
 
 CUSTOMER DETAILS:
 Name: ${submittedData.customer_name}
@@ -150,10 +229,7 @@ Sent from THE HURBERT website.`;
   };
 
   const openBoth = () => {
-    // ✅ Open WhatsApp
     openWhatsApp();
-    
-    // ✅ Open Gmail in new tab after short delay
     setTimeout(() => {
       openEmail();
     }, 500);
@@ -161,6 +237,7 @@ Sent from THE HURBERT website.`;
 
   const resetForm = () => {
     setSubmitSuccess(false);
+    setBookingNumber('');
   };
 
   return (
@@ -269,7 +346,7 @@ Sent from THE HURBERT website.`;
             </div>
 
             {/* Contact Info */}
-            <div className="mt-10 p-6 bg-gray-100 rounded-xl text-black">
+            <div className="mt-10 p-6 bg-black rounded-xl text-white">
               <h4
                 className="font-semibold mb-4"
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
@@ -327,6 +404,11 @@ Sent from THE HURBERT website.`;
                   >
                     Booking Request Received!
                   </h3>
+                  {bookingNumber && (
+                    <p className="text-sm bg-gray-100 inline-block px-4 py-2 rounded-full mb-4">
+                      Booking Reference: <span className="font-bold">{bookingNumber}</span>
+                    </p>
+                  )}
                   <p className="text-gray-600 mb-6">
                     Thank you for your booking request. Please choose how you'd like to send your message:
                   </p>
@@ -498,7 +580,7 @@ Sent from THE HURBERT website.`;
                     {isSubmitting ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Submitting...
+                        Processing...
                       </>
                     ) : (
                       <>
@@ -510,6 +592,7 @@ Sent from THE HURBERT website.`;
 
                   <p className="text-xs text-gray-500 text-center">
                     After submitting, you'll be able to send your request via WhatsApp or Gmail.
+                    Your booking will be saved in our system.
                   </p>
                 </form>
               )}
