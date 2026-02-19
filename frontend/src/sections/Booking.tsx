@@ -11,7 +11,7 @@ const bookingTypes = [
 const CONTACT_INFO = {
   phone: '0782169162',
   whatsapp: '250782169162',
-  email: 'cardinaloichirwa@gmail.com',
+  email: 'thehurbertltd@gmail.com',
   address: '1 KN 78 St, Kigali',
 };
 

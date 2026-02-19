@@ -20,6 +20,7 @@ export default function TourismForm() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [newActivity, setNewActivity] = useState('');
   const [newHighlight, setNewHighlight] = useState('');
   const [formData, setFormData] = useState<TourismFormData>({
@@ -43,18 +44,54 @@ export default function TourismForm() {
   }, [id]);
 
   const fetchTourism = async () => {
-    try {
-      const response = await fetch(`/api/tourism/${id}`);
-      const data = await response.json();
-      setFormData(data);
-    } catch (error) {
-      console.error('Failed to fetch destination:', error);
-    }
-  };
+  try {
+    const response = await fetch(`http://localhost:5000/api/tourism/${id}`);
+    const data = await response.json();
+    
+    // SAFELY parse activities and highlights
+    const parsedData = {
+      ...data,
+      activities: Array.isArray(data.activities) 
+        ? data.activities 
+        : (data.activities ? JSON.parse(data.activities) : []),
+      highlights: Array.isArray(data.highlights) 
+        ? data.highlights 
+        : (data.highlights ? JSON.parse(data.highlights) : [])
+    };
+    
+    setFormData(parsedData);
+  } catch (error) {
+    console.error('Failed to fetch destination:', error);
+  }
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // ✅ WORKING IMAGE UPLOAD
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const uploadData = new FormData();
+    uploadData.append('image', file);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/upload', {
+        method: 'POST',
+        body: uploadData
+      });
+      const data = await response.json();
+      setFormData(prev => ({ ...prev, image: data.url }));
+      console.log('✅ Image uploaded:', data.url);
+    } catch (error) {
+      console.error('❌ Upload failed:', error);
+    } finally {
+      setUploading(false);
+    }
   };
 
   const addActivity = () => {
@@ -96,7 +133,7 @@ export default function TourismForm() {
     setIsLoading(true);
 
     try {
-      const url = id ? `/api/tourism/${id}` : '/api/tourism';
+      const url = id ? `http://localhost:5000/api/tourism/${id}` : 'http://localhost:5000/api/tourism';
       const method = id ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -330,28 +367,62 @@ export default function TourismForm() {
           </div>
         </div>
 
-        {/* Image Upload */}
+        {/* ✅ WORKING IMAGE UPLOAD */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Image URL
+            Destination Image
           </label>
           <div className="flex gap-2">
             <input
-              type="url"
+              type="text"
               name="image"
               value={formData.image}
               onChange={handleChange}
               className="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent"
-              placeholder="https://..."
+              placeholder="Image URL or upload"
             />
-            <button
-              type="button"
-              className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
-            >
-              <Upload className="w-5 h-5" />
-              Upload
-            </button>
+            <div className="relative">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                disabled={uploading}
+              />
+              <button
+                type="button"
+                disabled={uploading}
+                className="px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                <Upload className="w-5 h-5" />
+                {uploading ? 'Uploading...' : 'Upload'}
+              </button>
+            </div>
           </div>
+          
+          {/* Image Preview */}
+          {formData.image && (
+            <div className="mt-4 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm font-medium text-gray-700 mb-3">Preview</p>
+              <div className="relative w-full h-48 bg-gray-100 rounded-lg overflow-hidden">
+                <img
+                  src={formData.image}
+                  alt="Preview"
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Invalid+Image';
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Status */}

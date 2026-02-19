@@ -16,7 +16,6 @@ import {
   Briefcase,
   Settings,
   Home,
-  BarChart3,
   Bell,
   Search
 } from 'lucide-react';

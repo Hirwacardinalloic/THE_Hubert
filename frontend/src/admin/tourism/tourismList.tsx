@@ -25,8 +25,7 @@ export default function TourismList() {
 
   const fetchTourism = async () => {
     try {
-      // Replace with your actual API call
-      const response = await fetch('/api/tourism');
+      const response = await fetch('http://localhost:5000/api/tourism');
       const data = await response.json();
       setTourism(data);
     } catch (error) {
@@ -40,7 +39,7 @@ export default function TourismList() {
     if (!confirm('Are you sure you want to delete this destination?')) return;
     
     try {
-      await fetch(`/api/tourism/${id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:5000/api/tourism/${id}`, { method: 'DELETE' });
       fetchTourism();
     } catch (error) {
       console.error('Failed to delete destination:', error);
@@ -132,7 +131,7 @@ export default function TourismList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-[#c9a86c]" />
-                  <span>Duration: {dest.duration}</span>
+                  <span>Best: {dest.bestTime}</span>
                 </div>
               </div>
 

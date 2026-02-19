@@ -5,7 +5,7 @@ import { MapPin, Phone, Mail, Clock, Send, MessageCircle, CheckCircle, MapPinned
 const CONTACT_INFO = {
   phone: '0782169162',
   whatsapp: '250782169162',
-  email: 'thehurbertltd@gmail.com',
+  email: 'cardinaloichirwa@gmail.com',
   address: '1 KN 78 St, Kigali',
 };
 
@@ -39,6 +39,7 @@ export default function Contact() {
   const [isVisible, setIsVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [messageId, setMessageId] = useState(null);
   
   // Store the submitted data separately for email/WhatsApp
   const [submittedData, setSubmittedData] = useState({
@@ -81,39 +82,76 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // ============================================
+  // ✅ COMPLETE HANDLE SUBMIT WITH DATABASE SAVE
+  // ============================================
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     const subject = formData.subject || 'New Contact Message';
     
-    // Store the submitted data for later use
-    setSubmittedData({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      subject: formData.subject,
-      message: formData.message,
-      email_subject: subject
-    });
+    try {
+      // ========================================
+      // STEP 1: SAVE TO DATABASE - ADMIN DASHBOARD
+      // ========================================
+      console.log('📤 Sending message to database...');
+      
+      const response = await fetch('http://localhost:5000/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || '',
+          subject: formData.subject || '',
+          message: formData.message
+        })
+      });
 
-    setSubmitSuccess(true);
-    
-    // Clear form
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: '',
-    });
+      const result = await response.json();
+      console.log('✅ Message saved to database:', result);
+      
+      if (result.id) {
+        setMessageId(result.id);
+      }
 
-    setIsSubmitting(false);
+      // ========================================
+      // STEP 2: STORE DATA FOR EMAIL/WHATSAPP
+      // ========================================
+      setSubmittedData({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+        email_subject: subject
+      });
+
+      // ========================================
+      // STEP 3: SHOW SUCCESS
+      // ========================================
+      setSubmitSuccess(true);
+      
+      // Clear form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: '',
+      });
+
+    } catch (error) {
+      console.error('❌ Contact submission failed:', error);
+      alert('There was an error sending your message. Please try again or contact us directly.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const openWhatsApp = () => {
-    // Use submittedData instead of formData
-    const message = `New Contact Message - THE HURBERT
+    const message = `Contact Message - THE HURBERT
 
 From:
 Name: ${submittedData.name || 'NOT PROVIDED'}
@@ -124,14 +162,15 @@ Subject:
 ${submittedData.subject || 'No subject'}
 
 Message:
-${submittedData.message || 'No message provided'}`;
+${submittedData.message || 'No message provided'}
+
+Message ID: ${messageId || 'N/A'}`;
 
     const whatsappUrl = `https://wa.me/${CONTACT_INFO.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
   const openEmail = () => {
-    // Use submittedData instead of formData
     const shortMessage = `CONTACT MESSAGE - THE HURBERT
 
 FROM:
@@ -145,38 +184,24 @@ ${submittedData.subject || 'No subject'}
 MESSAGE:
 ${submittedData.message || 'No message provided'}
 
+Message ID: ${messageId || 'N/A'}
 ---
 This message was sent from THE HURBERT contact form.`;
 
-    // Gmail web interface URL
     const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${encodeURIComponent(submittedData.email_subject)}&body=${encodeURIComponent(shortMessage)}`;
-    
-    // Open Gmail in a new tab
     window.open(gmailUrl, '_blank');
   };
 
   const openBoth = () => {
-  // Open WhatsApp
-  openWhatsApp();
-  
-  // Open email in a new tab
-  setTimeout(() => {
-    const subject = `Contact Message from ${submittedData.name}`;
-    const body = `Name: ${submittedData.name}
-Email: ${submittedData.email}
-Phone: ${submittedData.phone || 'Not provided'}
-Subject: ${submittedData.subject || 'No subject'}
-
-Message:
-${submittedData.message}`;
-    
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=thehurbertltd@gmail.com&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(gmailUrl, '_blank');
-  }, 300);
-};
+    openWhatsApp();
+    setTimeout(() => {
+      openEmail();
+    }, 500);
+  };
 
   const resetForm = () => {
     setSubmitSuccess(false);
+    setMessageId(null);
   };
 
   return (
@@ -314,6 +339,11 @@ ${submittedData.message}`;
                   >
                     Message Received!
                   </h3>
+                  {messageId && (
+                    <p className="text-sm bg-gray-100 inline-block px-4 py-2 rounded-full mb-4">
+                      Message ID: <span className="font-bold">{messageId}</span>
+                    </p>
+                  )}
                   <p className="text-gray-600 mb-6">
                     Thank you for reaching out. Please choose how you'd like to send your message:
                   </p>
@@ -449,6 +479,7 @@ ${submittedData.message}`;
 
                   <p className="text-xs text-gray-500 text-center">
                     After submitting, you'll be able to send your message via WhatsApp or Gmail.
+                    Your message will be saved in our system.
                   </p>
                 </form>
               )}

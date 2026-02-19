@@ -38,6 +38,9 @@ import PartnerForm from './admin/partners/PartnerForm';
 import StaffList from './admin/staff/StaffList';
 import StaffForm from './admin/staff/StaffForm';
 
+import MessagesList from './admin/messages/MessagesList';
+import MessageDetail from './admin/messages/MessageDetail';
+
 import Settings from './admin/settings/Settings';
 
 // Protected Route Component
@@ -129,6 +132,10 @@ function App() {
             <Route path="staff" element={<StaffList />} />
             <Route path="staff/new" element={<StaffForm />} />
             <Route path="staff/:id/edit" element={<StaffForm />} />
+
+            {/* Messages  */}
+             <Route path="messages" element={<MessagesList />} />
+             <Route path="messages/:id" element={<MessageDetail />} />
             
             {/* Settings */}
             <Route path="settings" element={<Settings />} />

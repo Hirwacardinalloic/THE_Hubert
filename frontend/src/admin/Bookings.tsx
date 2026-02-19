@@ -432,7 +432,7 @@ export default function AdminBookings() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-sm text-gray-600">
-                        {new Date(booking.createdAt).toLocaleDateString()}
+                        {booking.startDate || '?'} → {booking.endDate || '?'}
                       </span>
                     </td>
                     <td className="px-6 py-4">
