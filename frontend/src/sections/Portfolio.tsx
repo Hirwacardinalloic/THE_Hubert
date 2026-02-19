@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Calendar, MapPin, X, Users, Clock, CheckCircle, Car, Star, Briefcase, Mountain, TreePine, Landmark, Waves } from 'lucide-react';
 
-// Events/Projects - YOUR EXISTING HARDCODED DATA (KEPT AS IS)
+// Events/Projects - YOUR EXISTING HARDCODED DATA
 const events = [
   {
     id: 1,
@@ -207,7 +207,7 @@ const events = [
   },
 ];
 
-// Cars Fleet - YOUR EXISTING HARDCODED DATA (KEPT AS IS)
+// Cars Fleet - YOUR EXISTING HARDCODED DATA
 const cars = [
   {
     id: 101,
@@ -289,7 +289,7 @@ const cars = [
   },
 ];
 
-// Tourism Destinations - YOUR EXISTING HARDCODED DATA (KEPT AS IS)
+// Tourism Destinations - YOUR EXISTING HARDCODED DATA
 const tourism = [
   {
     id: 201,
@@ -388,9 +388,7 @@ export default function Portfolio() {
   const [activeTab, setActiveTab] = useState('all');
   const [returnToAllWorks, setReturnToAllWorks] = useState(false);
   
-  // ============================================
-  // NEW: State for database items
-  // ============================================
+  // State for database items
   const [dbEvents, setDbEvents] = useState<any[]>([]);
   const [dbCars, setDbCars] = useState<any[]>([]);
   const [dbTourism, setDbTourism] = useState<any[]>([]);
@@ -414,26 +412,23 @@ export default function Portfolio() {
     return () => observer.disconnect();
   }, []);
 
-  // ============================================
-  // NEW: Fetch items from database on mount
-  // ============================================
+  // Fetch items from database
   useEffect(() => {
     const fetchDbItems = async () => {
       setLoading(true);
       try {
-        // Fetch events from database
-        const eventsRes = await fetch('http://localhost:5000/api/events');
+        const [eventsRes, carsRes, tourismRes] = await Promise.all([
+          fetch('http://localhost:5000/api/events'),
+          fetch('http://localhost:5000/api/cars'),
+          fetch('http://localhost:5000/api/tourism')
+        ]);
+        
         const eventsData = await eventsRes.json();
-        setDbEvents(eventsData.filter((e: any) => e.status === 'active'));
-        
-        // Fetch cars from database
-        const carsRes = await fetch('http://localhost:5000/api/cars');
         const carsData = await carsRes.json();
-        setDbCars(carsData.filter((c: any) => c.status === 'available'));
-        
-        // Fetch tourism from database
-        const tourismRes = await fetch('http://localhost:5000/api/tourism');
         const tourismData = await tourismRes.json();
+        
+        setDbEvents(eventsData.filter((e: any) => e.status === 'active'));
+        setDbCars(carsData.filter((c: any) => c.status === 'available'));
         setDbTourism(tourismData.filter((t: any) => t.status === 'active'));
         
       } catch (error) {
@@ -447,20 +442,61 @@ export default function Portfolio() {
   }, []);
 
   // ============================================
-  // MODIFIED: Combine hardcoded + database items
+  // FIXED: Combine items with UNIQUE keys and CORRECT types
   // ============================================
   const allWorks = [
-    // Your original hardcoded items
-    ...events.map(event => ({ ...event, type: 'event', source: 'hardcoded' })),
-    ...cars.map(car => ({ ...car, type: 'car', source: 'hardcoded' })),
-    ...tourism.map(destination => ({ ...destination, type: 'tourism', source: 'hardcoded' })),
+    // Hardcoded events
+    ...events.map(event => ({ 
+      ...event, 
+      type: 'event', 
+      source: 'hardcoded',
+      uniqueId: `hardcoded-event-${event.id}`
+    })),
     
-    // New items from database
-    ...dbEvents.map(event => ({ ...event, type: 'event', source: 'database' })),
-    ...dbCars.map(car => ({ ...car, type: 'car', source: 'database' })),
-    ...dbTourism.map(tour => ({ ...tour, type: 'tourism', source: 'database' })),
+    // Hardcoded cars
+    ...cars.map(car => ({ 
+      ...car, 
+      type: 'car', 
+      source: 'hardcoded',
+      uniqueId: `hardcoded-car-${car.id}`
+    })),
+    
+    // Hardcoded tourism
+    ...tourism.map(destination => ({ 
+      ...destination, 
+      type: 'tourism', 
+      source: 'hardcoded',
+      uniqueId: `hardcoded-tourism-${destination.id}`
+    })),
+    
+    // Database events
+    ...dbEvents.map(event => ({ 
+      ...event, 
+      type: 'event', 
+      source: 'database',
+      uniqueId: `db-event-${event.id}`
+    })),
+    
+    // Database cars
+    ...dbCars.map(car => ({ 
+      ...car, 
+      type: 'car', 
+      source: 'database',
+      uniqueId: `db-car-${car.id}`
+    })),
+    
+    // Database tourism
+    ...dbTourism.map(tour => ({ 
+      ...tour, 
+      type: 'tourism', 
+      source: 'database',
+      uniqueId: `db-tourism-${tour.id}`
+    })),
   ];
 
+  // ============================================
+  // FIXED: Filter works based on active tab
+  // ============================================
   const filteredWorks = activeTab === 'all' 
     ? allWorks 
     : activeTab === 'events' 
@@ -469,7 +505,17 @@ export default function Portfolio() {
     ? allWorks.filter(item => item.type === 'car')
     : allWorks.filter(item => item.type === 'tourism');
 
-  // Handle closing modals - return to appropriate view
+  // Debug: log counts
+  useEffect(() => {
+    console.log('Filter counts:', {
+      all: allWorks.length,
+      events: allWorks.filter(item => item.type === 'event').length,
+      cars: allWorks.filter(item => item.type === 'car').length,
+      tourism: allWorks.filter(item => item.type === 'tourism').length,
+    });
+  }, [allWorks]);
+
+  // Handle closing modals
   const handleCloseEvent = () => {
     setSelectedEvent(null);
     if (returnToAllWorks) {
@@ -507,7 +553,7 @@ export default function Portfolio() {
     }
   };
 
-  // Helper to parse JSON fields from database
+  // Helper to parse JSON fields
   const parseJsonField = (field: any) => {
     if (!field) return [];
     if (Array.isArray(field)) return field;
@@ -517,6 +563,16 @@ export default function Portfolio() {
       return [];
     }
   };
+
+  if (loading) {
+    return (
+      <section className="relative w-full py-24 lg:py-32 bg-white">
+        <div className="flex items-center justify-center h-64">
+          <div className="w-8 h-8 border-4 border-[#c9a86c] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -563,11 +619,11 @@ export default function Portfolio() {
           </button>
         </div>
 
-        {/* Featured Projects Grid (First 6 from combined list) */}
+        {/* Featured Projects Grid (First 6) */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
           {allWorks.slice(0, 6).map((project, index) => (
             <div
-              key={`${project.source}-${project.id}`}
+              key={project.uniqueId}  // ✅ Using uniqueId
               onClick={() => {
                 if (project.type === 'event') setSelectedEvent(project);
                 else if (project.type === 'car') setSelectedCar(project);
@@ -594,6 +650,9 @@ export default function Portfolio() {
                   src={project.image || '/placeholder.jpg'}
                   alt={project.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
                 />
 
                 {/* Overlay */}
@@ -693,6 +752,9 @@ export default function Portfolio() {
                   src={selectedEvent.image || '/placeholder.jpg'}
                   alt={selectedEvent.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -830,6 +892,9 @@ export default function Portfolio() {
                   src={selectedCar.image || '/placeholder.jpg'}
                   alt={selectedCar.title}
                   className="w-full h-64 md:h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
                 />
               </div>
 
@@ -912,6 +977,9 @@ export default function Portfolio() {
                   src={selectedTourism.image || '/placeholder.jpg'}
                   alt={selectedTourism.title}
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
                 <div className="absolute bottom-6 left-6 right-6">
@@ -1046,7 +1114,7 @@ export default function Portfolio() {
                   Explore our portfolio of successful events, premium vehicles, and top destinations
                 </p>
 
-                {/* Tabs - Show counts */}
+                {/* Tabs */}
                 <div className="flex flex-wrap gap-4 mt-6">
                   <button
                     onClick={() => setActiveTab('all')}
@@ -1096,7 +1164,7 @@ export default function Portfolio() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredWorks.map((item) => (
                     <div
-                      key={`${item.source}-${item.id}`}
+                      key={item.uniqueId}  // ✅ Using uniqueId
                       onClick={() => handleOpenFromAllWorks(item)}
                       className="group relative rounded-xl overflow-hidden shadow-lg cursor-pointer"
                     >
@@ -1105,6 +1173,9 @@ export default function Portfolio() {
                           src={item.image || '/placeholder.jpg'}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                          }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
                         
