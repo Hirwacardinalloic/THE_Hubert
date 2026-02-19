@@ -1,29 +1,35 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, Linkedin, Mail, ChevronRight } from 'lucide-react';
 
-const staffMembers = [
+// ============================================
+// YOUR EXISTING HARDCODED STAFF DATA WITH IMAGES
+// ============================================
+const hardcodedStaff = [
   {
     id: 1,
     name: 'Harindintwali Jean Paul',
     role: 'Chief Executive Officer',
-    image: '/staff/ceo.jpeg', 
+    image: '/staff/ceo.jpeg',      
     bio: 'Visionary leader with over 10 years of experience in event management and hospitality.',
+    linkedin: '#',
     email: 'ceo@thehurbert.com',
   },
   {
     id: 2,
     name: 'Iyumva Danny',
     role: 'Chief Marketing Officer',
-    image: '/staff/cmo.jpeg',
+    image: '/staff/cmo.jpeg',      
     bio: 'Marketing expert specializing in luxury brand experiences and customer engagement.',
+    linkedin: '#',
     email: 'cmo@thehurbert.com',
   },
   {
     id: 3,
     name: 'Mbabazi Channy',
     role: 'Site Manager',
-    image: '/staff/sm.jpeg', 
+    image: '/staff/sm.jpeg',  
     bio: 'Ensures flawless execution of all events with meticulous attention to detail.',
+    linkedin: '#',
     email: 'manager@thehurbert.com',
   },
 ];
@@ -31,7 +37,16 @@ const staffMembers = [
 export default function Staff() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [selectedStaff, setSelectedStaff] = useState<typeof staffMembers[0] | null>(null);
+  const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
+  
+  // ============================================
+  // State for database items
+  // ============================================
+  const [dbStaff, setDbStaff] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Combine hardcoded + database staff
+  const [staff, setStaff] = useState<any[]>(hardcodedStaff);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -50,6 +65,39 @@ export default function Staff() {
 
     return () => observer.disconnect();
   }, []);
+
+  // ============================================
+  // Fetch staff from database
+  // ============================================
+  useEffect(() => {
+    const fetchDbStaff = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('http://localhost:5000/api/staff');
+        const data = await response.json();
+        setDbStaff(data.filter((s: any) => s.status === 'active'));
+        setStaff([...hardcodedStaff, ...data.filter((s: any) => s.status === 'active')]);
+      } catch (error) {
+        console.error('Error fetching staff from database:', error);
+        // If fetch fails, keep only hardcoded
+        setStaff(hardcodedStaff);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDbStaff();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="relative w-full py-24 lg:py-32 bg-gray-50">
+        <div className="flex items-center justify-center h-64">
+          <div className="w-8 h-8 border-4 border-[#c9a86c] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -95,65 +143,73 @@ export default function Staff() {
         </div>
 
         {/* Staff Grid */}
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-10">
-          {staffMembers.map((staff, index) => (
-            <div
-              key={staff.id}
-              className={`group relative cursor-pointer transition-all duration-700 ${
-                isVisible
-                  ? 'opacity-100 translate-y-0'
-                  : 'opacity-0 translate-y-12'
-              }`}
-              style={{ transitionDelay: `${200 + index * 150}ms` }}
-              onClick={() => setSelectedStaff(staff)}
-            >
-              <div className="relative rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2">
-                {/* Image */}
-                <div className="aspect-square overflow-hidden">
-                  <img
-                    src={staff.image}
-                    alt={staff.name}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  
-                  {/* Gold Overlay on Hover */}
-                  <div className="absolute inset-0 bg-[#c9a86c]/0 group-hover:bg-[#c9a86c]/10 transition-all duration-500" />
+        {staff.length === 0 ? (
+          <p className="text-center text-gray-500">No team members to display</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {staff.map((member, index) => (
+              <div
+                key={member.id}
+                className={`group relative cursor-pointer transition-all duration-700 ${
+                  isVisible
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-12'
+                }`}
+                style={{ transitionDelay: `${200 + index * 150}ms` }}
+                onClick={() => setSelectedStaff(member)}
+              >
+                <div className="relative rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2">
+                  {/* Image */}
+                  <div className="aspect-square overflow-hidden">
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        // If image fails to load, show a placeholder
+                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400?text=Team';
+                      }}
+                    />
+                    
+                    {/* Gold Overlay on Hover */}
+                    <div className="absolute inset-0 bg-[#c9a86c]/0 group-hover:bg-[#c9a86c]/10 transition-all duration-500" />
+                  </div>
+
+                  {/* Info Overlay - Shows on hover */}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                    <h3
+                      className="text-xl font-bold text-white mb-1"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      {member.name}
+                    </h3>
+                    <p className="text-[#c9a86c] font-medium text-sm mb-3">
+                      {member.role}
+                    </p>
+                    <div className="flex items-center gap-2 text-white/80 text-sm">
+                      <span>Click to view profile</span>
+                      <ChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+
+                  {/* Gold Accent Border */}
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#c9a86c] transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
                 </div>
 
-                {/* Info Overlay - Shows on hover */}
-                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
+                {/* Name below image (visible always) */}
+                <div className="text-center mt-4">
                   <h3
-                    className="text-xl font-bold text-white mb-1"
+                    className="text-lg font-semibold text-black"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    {staff.name}
+                    {member.name}
                   </h3>
-                  <p className="text-[#c9a86c] font-medium text-sm mb-3">
-                    {staff.role}
-                  </p>
-                  <div className="flex items-center gap-2 text-white/80 text-sm">
-                    <span>Click to view profile</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </div>
+                  <p className="text-gray-500 text-sm">{member.role}</p>
                 </div>
-
-                {/* Gold Accent Border */}
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#c9a86c] transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
               </div>
-
-              {/* Name below image (visible always) */}
-              <div className="text-center mt-4">
-                <h3
-                  className="text-lg font-semibold text-black"
-                  style={{ fontFamily: 'Montserrat, sans-serif' }}
-                >
-                  {staff.name}
-                </h3>
-                <p className="text-gray-500 text-sm">{staff.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Staff Detail Modal */}
@@ -181,6 +237,9 @@ export default function Staff() {
                   src={selectedStaff.image}
                   alt={selectedStaff.name}
                   className="w-full h-64 md:h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400';
+                  }}
                 />
               </div>
 
@@ -199,7 +258,7 @@ export default function Staff() {
                 </div>
 
                 <p className="text-gray-600 leading-relaxed mb-8">
-                  {selectedStaff.bio}
+                  {selectedStaff.bio || 'No biography available.'}
                 </p>
 
                 <div className="space-y-4">

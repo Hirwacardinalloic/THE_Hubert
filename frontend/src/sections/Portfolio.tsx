@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Calendar, MapPin, X, Users, Clock, CheckCircle, Car, Star, Briefcase, Mountain, TreePine, Landmark, Waves } from 'lucide-react';
 
-// Events/Projects
+// Events/Projects - YOUR EXISTING HARDCODED DATA (KEPT AS IS)
 const events = [
   {
     id: 1,
@@ -207,7 +207,7 @@ const events = [
   },
 ];
 
-// Cars Fleet
+// Cars Fleet - YOUR EXISTING HARDCODED DATA (KEPT AS IS)
 const cars = [
   {
     id: 101,
@@ -289,7 +289,7 @@ const cars = [
   },
 ];
 
-// Tourism Destinations
+// Tourism Destinations - YOUR EXISTING HARDCODED DATA (KEPT AS IS)
 const tourism = [
   {
     id: 201,
@@ -381,12 +381,20 @@ export default function Portfolio() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<number | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
-  const [selectedCar, setSelectedCar] = useState<typeof cars[0] | null>(null);
-  const [selectedTourism, setSelectedTourism] = useState<typeof tourism[0] | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [selectedCar, setSelectedCar] = useState<any | null>(null);
+  const [selectedTourism, setSelectedTourism] = useState<any | null>(null);
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [returnToAllWorks, setReturnToAllWorks] = useState(false);
+  
+  // ============================================
+  // NEW: State for database items
+  // ============================================
+  const [dbEvents, setDbEvents] = useState<any[]>([]);
+  const [dbCars, setDbCars] = useState<any[]>([]);
+  const [dbTourism, setDbTourism] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -406,11 +414,51 @@ export default function Portfolio() {
     return () => observer.disconnect();
   }, []);
 
-  // Combine all items for "All Works" view
+  // ============================================
+  // NEW: Fetch items from database on mount
+  // ============================================
+  useEffect(() => {
+    const fetchDbItems = async () => {
+      setLoading(true);
+      try {
+        // Fetch events from database
+        const eventsRes = await fetch('http://localhost:5000/api/events');
+        const eventsData = await eventsRes.json();
+        setDbEvents(eventsData.filter((e: any) => e.status === 'active'));
+        
+        // Fetch cars from database
+        const carsRes = await fetch('http://localhost:5000/api/cars');
+        const carsData = await carsRes.json();
+        setDbCars(carsData.filter((c: any) => c.status === 'available'));
+        
+        // Fetch tourism from database
+        const tourismRes = await fetch('http://localhost:5000/api/tourism');
+        const tourismData = await tourismRes.json();
+        setDbTourism(tourismData.filter((t: any) => t.status === 'active'));
+        
+      } catch (error) {
+        console.error('Error fetching from database:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchDbItems();
+  }, []);
+
+  // ============================================
+  // MODIFIED: Combine hardcoded + database items
+  // ============================================
   const allWorks = [
-    ...events.map(event => ({ ...event, type: 'event' })),
-    ...cars.map(car => ({ ...car, type: 'car' })),
-    ...tourism.map(destination => ({ ...destination, type: 'tourism' })),
+    // Your original hardcoded items
+    ...events.map(event => ({ ...event, type: 'event', source: 'hardcoded' })),
+    ...cars.map(car => ({ ...car, type: 'car', source: 'hardcoded' })),
+    ...tourism.map(destination => ({ ...destination, type: 'tourism', source: 'hardcoded' })),
+    
+    // New items from database
+    ...dbEvents.map(event => ({ ...event, type: 'event', source: 'database' })),
+    ...dbCars.map(car => ({ ...car, type: 'car', source: 'database' })),
+    ...dbTourism.map(tour => ({ ...tour, type: 'tourism', source: 'database' })),
   ];
 
   const filteredWorks = activeTab === 'all' 
@@ -451,11 +499,22 @@ export default function Portfolio() {
     setShowAllWorks(false);
     setReturnToAllWorks(true);
     if (item.type === 'event') {
-      setSelectedEvent(item as any);
+      setSelectedEvent(item);
     } else if (item.type === 'car') {
-      setSelectedCar(item as any);
+      setSelectedCar(item);
     } else if (item.type === 'tourism') {
-      setSelectedTourism(item as any);
+      setSelectedTourism(item);
+    }
+  };
+
+  // Helper to parse JSON fields from database
+  const parseJsonField = (field: any) => {
+    if (!field) return [];
+    if (Array.isArray(field)) return field;
+    try {
+      return JSON.parse(field);
+    } catch {
+      return [];
     }
   };
 
@@ -504,12 +563,16 @@ export default function Portfolio() {
           </button>
         </div>
 
-        {/* Featured Projects Grid (First 6) */}
+        {/* Featured Projects Grid (First 6 from combined list) */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {events.slice(0, 6).map((project, index) => (
+          {allWorks.slice(0, 6).map((project, index) => (
             <div
-              key={project.id}
-              onClick={() => setSelectedEvent(project)}
+              key={`${project.source}-${project.id}`}
+              onClick={() => {
+                if (project.type === 'event') setSelectedEvent(project);
+                else if (project.type === 'car') setSelectedCar(project);
+                else setSelectedTourism(project);
+              }}
               className={`group relative rounded-xl overflow-hidden shadow-lg cursor-pointer transition-all duration-700 ${
                 isVisible
                   ? 'opacity-100 translate-y-0'
@@ -528,7 +591,7 @@ export default function Portfolio() {
               {/* Image */}
               <div className="aspect-[4/5] relative overflow-hidden">
                 <img
-                  src={project.image}
+                  src={project.image || '/placeholder.jpg'}
                   alt={project.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 />
@@ -556,7 +619,7 @@ export default function Portfolio() {
                     </span>
                     <span className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      {project.date}
+                      {project.date || project.bestTime || 'N/A'}
                     </span>
                   </div>
 
@@ -627,7 +690,7 @@ export default function Portfolio() {
               {/* Header Image */}
               <div className="relative h-64 md:h-80">
                 <img
-                  src={selectedEvent.image}
+                  src={selectedEvent.image || '/placeholder.jpg'}
                   alt={selectedEvent.title}
                   className="w-full h-full object-cover"
                 />
@@ -654,12 +717,12 @@ export default function Portfolio() {
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <Users className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Attendees</p>
-                    <p className="font-semibold text-black">{selectedEvent.attendees}</p>
+                    <p className="font-semibold text-black">{selectedEvent.attendees || 'N/A'}</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <Clock className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
                     <p className="text-sm text-gray-500">Duration</p>
-                    <p className="font-semibold text-black">{selectedEvent.duration}</p>
+                    <p className="font-semibold text-black">{selectedEvent.duration || 'N/A'}</p>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
                     <MapPin className="w-6 h-6 text-[#c9a86c] mx-auto mb-2" />
@@ -691,31 +754,38 @@ export default function Portfolio() {
                   )}
                 </div>
 
-                {/* Services Provided - YOUR ACTUAL SERVICES */}
-                <div className="mb-8">
-                  <h3
-                    className="text-xl font-bold text-black mb-3"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Our Services Provided
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedEvent.servicesProvided.map((service, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] text-sm font-medium rounded-full"
-                      >
-                        {service}
-                      </span>
-                    ))}
+                {/* Services Provided */}
+                {selectedEvent.servicesProvided && (
+                  <div className="mb-8">
+                    <h3
+                      className="text-xl font-bold text-black mb-3"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      Our Services Provided
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {(selectedEvent.source === 'database' 
+                        ? parseJsonField(selectedEvent.servicesProvided)
+                        : selectedEvent.servicesProvided
+                      ).map((service: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] text-sm font-medium rounded-full"
+                        >
+                          {service}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Client */}
-                <div className="p-4 bg-gray-50 rounded-lg mb-6">
-                  <p className="text-sm text-gray-500">Client</p>
-                  <p className="font-semibold text-black">{selectedEvent.client}</p>
-                </div>
+                {selectedEvent.client && (
+                  <div className="p-4 bg-gray-50 rounded-lg mb-6">
+                    <p className="text-sm text-gray-500">Client</p>
+                    <p className="font-semibold text-black">{selectedEvent.client}</p>
+                  </div>
+                )}
 
                 {/* CTA Button */}
                 <button
@@ -757,7 +827,7 @@ export default function Portfolio() {
               {/* Left - Image */}
               <div className="md:w-1/2 bg-gray-100">
                 <img
-                  src={selectedCar.image}
+                  src={selectedCar.image || '/placeholder.jpg'}
                   alt={selectedCar.title}
                   className="w-full h-64 md:h-full object-cover"
                 />
@@ -839,7 +909,7 @@ export default function Portfolio() {
               {/* Header Image */}
               <div className="relative h-64 md:h-80">
                 <img
-                  src={selectedTourism.image}
+                  src={selectedTourism.image || '/placeholder.jpg'}
                   alt={selectedTourism.title}
                   className="w-full h-full object-cover"
                 />
@@ -894,30 +964,37 @@ export default function Portfolio() {
                 </div>
 
                 {/* Activities */}
-                <div className="mb-8">
-                  <h3
-                    className="text-xl font-bold text-black mb-3"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    Activities
-                  </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedTourism.activities.map((activity, index) => (
-                      <span
-                        key={index}
-                        className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] text-sm font-medium rounded-full"
-                      >
-                        {activity}
-                      </span>
-                    ))}
+                {selectedTourism.activities && (
+                  <div className="mb-8">
+                    <h3
+                      className="text-xl font-bold text-black mb-3"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      Activities
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {(selectedTourism.source === 'database'
+                        ? parseJsonField(selectedTourism.activities)
+                        : selectedTourism.activities
+                      ).map((activity: string, index: number) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] text-sm font-medium rounded-full"
+                        >
+                          {activity}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Best Season */}
-                <div className="p-4 bg-gray-50 rounded-lg mb-6">
-                  <p className="text-sm text-gray-500">Best Season to Visit</p>
-                  <p className="font-semibold text-black">{selectedTourism.bestSeason}</p>
-                </div>
+                {selectedTourism.bestSeason && (
+                  <div className="p-4 bg-gray-50 rounded-lg mb-6">
+                    <p className="text-sm text-gray-500">Best Season to Visit</p>
+                    <p className="font-semibold text-black">{selectedTourism.bestSeason}</p>
+                  </div>
+                )}
 
                 {/* CTA Button */}
                 <button
@@ -969,7 +1046,7 @@ export default function Portfolio() {
                   Explore our portfolio of successful events, premium vehicles, and top destinations
                 </p>
 
-                {/* Tabs */}
+                {/* Tabs - Show counts */}
                 <div className="flex flex-wrap gap-4 mt-6">
                   <button
                     onClick={() => setActiveTab('all')}
@@ -979,7 +1056,7 @@ export default function Portfolio() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    All
+                    All ({allWorks.length})
                   </button>
                   <button
                     onClick={() => setActiveTab('events')}
@@ -989,7 +1066,7 @@ export default function Portfolio() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    Events
+                    Events ({allWorks.filter(item => item.type === 'event').length})
                   </button>
                   <button
                     onClick={() => setActiveTab('cars')}
@@ -999,7 +1076,7 @@ export default function Portfolio() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    Cars
+                    Cars ({allWorks.filter(item => item.type === 'car').length})
                   </button>
                   <button
                     onClick={() => setActiveTab('tourism')}
@@ -1009,7 +1086,7 @@ export default function Portfolio() {
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    Tourism
+                    Tourism ({allWorks.filter(item => item.type === 'tourism').length})
                   </button>
                 </div>
               </div>
@@ -1019,13 +1096,13 @@ export default function Portfolio() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredWorks.map((item) => (
                     <div
-                      key={item.id}
+                      key={`${item.source}-${item.id}`}
                       onClick={() => handleOpenFromAllWorks(item)}
                       className="group relative rounded-xl overflow-hidden shadow-lg cursor-pointer"
                     >
                       <div className="aspect-[4/3] relative overflow-hidden">
                         <img
-                          src={item.image}
+                          src={item.image || '/placeholder.jpg'}
                           alt={item.title}
                           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
@@ -1033,9 +1110,9 @@ export default function Portfolio() {
                         
                         <div className="absolute top-3 left-3 flex gap-2">
                           <span className="px-3 py-1 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded">
-                            {item.type === 'event' ? item.category : item.type === 'car' ? item.category : item.category}
+                            {item.category}
                           </span>
-                          {item.type === 'car' && (
+                          {item.type === 'car' && item.price && (
                             <span className="px-3 py-1 bg-blue-500 text-white text-xs font-semibold uppercase tracking-wider rounded">
                               {item.price}
                             </span>

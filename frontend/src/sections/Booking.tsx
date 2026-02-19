@@ -346,7 +346,7 @@ Sent from THE HURBERT website.`;
             </div>
 
             {/* Contact Info */}
-            <div className="mt-10 p-6 bg-black rounded-xl text-white">
+            <div className="mt-10 p-6 bg-gray-100 rounded-xl text-black">
               <h4
                 className="font-semibold mb-4"
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
