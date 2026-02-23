@@ -23,7 +23,7 @@ const slides = [
     subtitle: 'TOURISM',
     title: 'Discover the Beauty of Rwanda',
     description: 'Explore the Land of a Thousand Hills with our curated destination management services.',
-    image: 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=1920&q=80',
+    image: './kivu.png',
     link: '#services',
   },
 ];
