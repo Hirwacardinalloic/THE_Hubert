@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, Calendar, MapPin, X, Users, Clock, Car, Star, Briefcase, Mountain } from 'lucide-react';
 
 export default function Portfolio() {
@@ -9,13 +10,9 @@ export default function Portfolio() {
   const [selectedTourism, setSelectedTourism] = useState<any | null>(null);
   const [showAllWorks, setShowAllWorks] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
-  const [returnToAllWorks, setReturnToAllWorks] = useState(false); // Track if we should return to all works
+  const [returnToAllWorks, setReturnToAllWorks] = useState(false);
   
-  // State for database items
-  const [events, setEvents] = useState<any[]>([]);
-  const [cars, setCars] = useState<any[]>([]);
-  const [tourism, setTourism] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -35,46 +32,55 @@ export default function Portfolio() {
     return () => observer.disconnect();
   }, []);
 
-  // Fetch data
+  // Fetch events with React Query
+  const { data: events = [], refetch: refetchEvents } = useQuery({
+    queryKey: ['events'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:5000/api/events');
+      const data = await response.json();
+      const activeEvents = data.filter((e: any) => e.status === 'active');
+      return removeDuplicates(activeEvents, 'title');
+    },
+  });
+
+  // Fetch cars with React Query
+  const { data: cars = [], refetch: refetchCars } = useQuery({
+    queryKey: ['cars'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:5000/api/cars');
+      const data = await response.json();
+      const activeCars = data.filter((c: any) => c.status === 'available');
+      return removeDuplicates(activeCars, 'title');
+    },
+  });
+
+  // Fetch tourism with React Query
+  const { data: tourism = [], refetch: refetchTourism } = useQuery({
+    queryKey: ['tourism'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:5000/api/tourism');
+      const data = await response.json();
+      const activeTourism = data.filter((t: any) => t.status === 'active');
+      return removeDuplicates(activeTourism, 'title');
+    },
+  });
+
+  // Listen for storage events (when admin makes changes)
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [eventsRes, carsRes, tourismRes] = await Promise.all([
-          fetch('http://localhost:5000/api/events'),
-          fetch('http://localhost:5000/api/cars'),
-          fetch('http://localhost:5000/api/tourism')
-        ]);
-        
-        const eventsData = await eventsRes.json();
-        const carsData = await carsRes.json();
-        const tourismData = await tourismRes.json();
-        
-        // Filter active items
-        const activeEvents = eventsData.filter((e: any) => e.status === 'active');
-        const activeCars = carsData.filter((c: any) => c.status === 'available');
-        const activeTourism = tourismData.filter((t: any) => t.status === 'active');
-        
-        // Remove duplicates by title
-        const uniqueEvents = removeDuplicates(activeEvents, 'title');
-        const uniqueCars = removeDuplicates(activeCars, 'title');
-        const uniqueTourism = removeDuplicates(activeTourism, 'title');
-        
-        setEvents(uniqueEvents);
-        setCars(uniqueCars);
-        setTourism(uniqueTourism);
-        
-      } catch (error) {
-        console.error('Error fetching:', error);
-      } finally {
-        setLoading(false);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'admin-update') {
+        // Refetch all data when admin makes changes
+        refetchEvents();
+        refetchCars();
+        refetchTourism();
       }
     };
-    
-    fetchData();
-  }, []);
 
-  // Helper function to remove duplicates based on a key
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [refetchEvents, refetchCars, refetchTourism]);
+
+  // Helper function to remove duplicates
   const removeDuplicates = (array: any[], key: string) => {
     const seen = new Set();
     return array.filter(item => {
@@ -86,9 +92,9 @@ export default function Portfolio() {
 
   // Combine all items
   const allWorks = [
-    ...events.map(event => ({ ...event, type: 'event' })),
-    ...cars.map(car => ({ ...car, type: 'car' })),
-    ...tourism.map(tour => ({ ...tour, type: 'tourism' })),
+    ...events.map((event: any) => ({ ...event, type: 'event' })),
+    ...cars.map((car: any) => ({ ...car, type: 'car' })),
+    ...tourism.map((tour: any) => ({ ...tour, type: 'tourism' })),
   ];
 
   const filteredWorks = activeTab === 'all' 
@@ -156,7 +162,8 @@ export default function Portfolio() {
     }
   };
 
-  if (loading) {
+  // Show loading if data is still being fetched
+  if (events.length === 0 && cars.length === 0 && tourism.length === 0) {
     return (
       <section className="w-full py-24 bg-white">
         <div className="flex justify-center">
@@ -195,77 +202,71 @@ export default function Portfolio() {
         </div>
 
         {/* Featured Grid */}
-        {allWorks.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {allWorks.slice(0, 6).map((item, index) => (
-              <div
-                key={`${item.type}-${item.id}-${index}`}
-                onClick={() => {
-                  if (item.type === 'event') setSelectedEvent(item);
-                  else if (item.type === 'car') setSelectedCar(item);
-                  else setSelectedTourism(item);
-                }}
-                className="group relative rounded-xl overflow-hidden shadow-lg cursor-pointer"
-              >
-                <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
-                  <img
-                    src={getImageUrl(item.image)}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.jpg';
-                    }}
-                  />
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          {allWorks.slice(0, 6).map((item, index) => (
+            <div
+              key={`${item.type}-${item.id}-${index}`}
+              onClick={() => {
+                if (item.type === 'event') setSelectedEvent(item);
+                else if (item.type === 'car') setSelectedCar(item);
+                else setSelectedTourism(item);
+              }}
+              className="group relative rounded-xl overflow-hidden shadow-lg cursor-pointer"
+            >
+              <div className="aspect-[4/5] relative overflow-hidden bg-gray-100">
+                <img
+                  src={getImageUrl(item.image)}
+                  alt={item.title}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                  }}
+                />
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
-                  <div className="absolute top-4 left-4">
-                    <span className="px-4 py-2 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded">
-                      {item.category || 'Portfolio'}
+                <div className="absolute top-4 left-4">
+                  <span className="px-4 py-2 bg-[#c9a86c] text-white text-xs font-semibold uppercase tracking-wider rounded">
+                    {item.category || 'Portfolio'}
+                  </span>
+                </div>
+
+                <div className="absolute inset-x-0 bottom-0 p-6">
+                  <div className="flex items-center gap-4 text-white/70 text-sm mb-3">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {item.location || 'Rwanda'}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {item.date || item.bestTime || 'TBA'}
                     </span>
                   </div>
 
-                  <div className="absolute inset-x-0 bottom-0 p-6">
-                    <div className="flex items-center gap-4 text-white/70 text-sm mb-3">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {item.location || 'Rwanda'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {item.date || item.bestTime || 'TBA'}
-                      </span>
-                    </div>
+                  <h3 className="text-xl font-bold text-white mb-4 line-clamp-2">
+                    {item.title}
+                  </h3>
 
-                    <h3 className="text-xl font-bold text-white mb-4 line-clamp-2">
-                      {item.title}
-                    </h3>
-
-                    <button className="inline-flex items-center gap-2 text-[#c9a86c] font-semibold text-sm uppercase tracking-wider">
-                      Show project
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <button className="inline-flex items-center gap-2 text-[#c9a86c] font-semibold text-sm uppercase tracking-wider">
+                    Show project
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-center text-gray-500">No items to display</p>
-        )}
+            </div>
+          ))}
+        </div>
 
         {/* View More Button */}
-        {allWorks.length > 0 && (
-          <div className="text-center mt-16">
-            <button
-              onClick={() => setShowAllWorks(true)}
-              className="inline-flex items-center gap-3 border-2 border-black text-black px-8 py-4 font-semibold text-sm uppercase tracking-wider rounded hover:bg-black hover:text-white transition-colors"
-            >
-              View All Works
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+        <div className="text-center mt-16">
+          <button
+            onClick={() => setShowAllWorks(true)}
+            className="inline-flex items-center gap-3 border-2 border-black text-black px-8 py-4 font-semibold text-sm uppercase tracking-wider rounded hover:bg-black hover:text-white transition-colors"
+          >
+            View All Works
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* All Works Modal */}

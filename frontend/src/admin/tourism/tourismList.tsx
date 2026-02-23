@@ -40,6 +40,10 @@ export default function TourismList() {
     
     try {
       await fetch(`http://localhost:5000/api/tourism/${id}`, { method: 'DELETE' });
+      
+      // 🔴 TRIGGER AUTO-REFRESH ON PUBLIC WEBSITE
+      localStorage.setItem('admin-update', Date.now().toString());
+      
       fetchTourism();
     } catch (error) {
       console.error('Failed to delete destination:', error);

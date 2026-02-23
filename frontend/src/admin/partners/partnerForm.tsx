@@ -81,6 +81,9 @@ export default function PartnerForm() {
       });
 
       if (response.ok) {
+        // 🔴 ONLY THIS LINE ADDED - Trigger auto-refresh on public website
+        localStorage.setItem('admin-update', Date.now().toString());
+        
         navigate('/admin/partners');
       }
     } catch (error) {

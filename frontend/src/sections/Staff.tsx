@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { X, Linkedin, Mail, ChevronRight } from 'lucide-react';
 
 export default function Staff() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
-  
-  const [staff, setStaff] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -27,24 +25,27 @@ export default function Staff() {
     return () => observer.disconnect();
   }, []);
 
+  // Fetch staff with React Query
+  const { data: staff = [], refetch, isLoading } = useQuery({
+    queryKey: ['staff'],
+    queryFn: async () => {
+      const response = await fetch('http://localhost:5000/api/staff');
+      const data = await response.json();
+      return data.filter((s: any) => s.status === 'active');
+    },
+  });
+
+  // Listen for storage events (when admin makes changes)
   useEffect(() => {
-    const fetchStaff = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('http://localhost:5000/api/staff');
-        const data = await response.json();
-        const activeStaff = data.filter((s: any) => s.status === 'active');
-        setStaff(activeStaff);
-      } catch (error) {
-        console.error('Error fetching staff:', error);
-        setStaff([]);
-      } finally {
-        setLoading(false);
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'admin-update') {
+        refetch();
       }
     };
-    
-    fetchStaff();
-  }, []);
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, [refetch]);
 
   const getImageUrl = (image: string) => {
     if (!image) return '/placeholder.jpg';
@@ -285,7 +286,7 @@ export default function Staff() {
     }
   `;
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div style={{
         width: '100%',
@@ -331,7 +332,7 @@ export default function Staff() {
             <p style={{ textAlign: 'center', color: '#6b7280' }}>No team members to display.</p>
           ) : (
             <div className="staff-grid">
-              {staff.map((member) => (
+              {staff.map((member: any) => (
                 <div
                   key={member.id}
                   className="staff-card"
@@ -357,7 +358,7 @@ export default function Staff() {
           )}
         </div>
 
-        {/* Staff Detail Modal - FIXED with FULL IMAGE */}
+        {/* Staff Detail Modal */}
         {selectedStaff && (
           <div
             className="modal-overlay"
@@ -375,7 +376,7 @@ export default function Staff() {
               </button>
 
               <div className="modal-content">
-                {/* FIXED: Image section showing FULL image */}
+                {/* Image section showing FULL image */}
                 <div style={{
                   width: '100%',
                   backgroundColor: '#f3f4f6',

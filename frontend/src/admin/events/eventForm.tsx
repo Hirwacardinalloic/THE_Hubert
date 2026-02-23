@@ -71,7 +71,6 @@ export default function EventForm() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // ✅ WORKING IMAGE UPLOAD
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -119,6 +118,8 @@ export default function EventForm() {
       });
 
       if (response.ok) {
+        // 🔴 TRIGGER AUTO-REFRESH ON PUBLIC WEBSITE
+        localStorage.setItem('admin-update', Date.now().toString());
         navigate('/admin/events');
       }
     } catch (error) {
@@ -320,7 +321,7 @@ export default function EventForm() {
           </div>
         </div>
 
-        {/* ✅ WORKING IMAGE UPLOAD */}
+        {/* Image Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Event Image

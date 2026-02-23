@@ -24,8 +24,7 @@ export default function CarsList() {
 
   const fetchCars = async () => {
     try {
-      // Replace with your actual API call
-      const response = await fetch('/api/cars');
+      const response = await fetch('http://localhost:5000/api/cars');
       const data = await response.json();
       setCars(data);
     } catch (error) {
@@ -39,8 +38,12 @@ export default function CarsList() {
     if (!confirm('Are you sure you want to delete this car?')) return;
     
     try {
-      await fetch(`/api/cars/${id}`, { method: 'DELETE' });
-      fetchCars();
+      await fetch(`http://localhost:5000/api/cars/${id}`, { method: 'DELETE' });
+      
+      // 🔴 TRIGGER AUTO-REFRESH ON PUBLIC WEBSITE
+      localStorage.setItem('admin-update', Date.now().toString());
+      
+      fetchCars(); // Refresh the list
     } catch (error) {
       console.error('Failed to delete car:', error);
     }

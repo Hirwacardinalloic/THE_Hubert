@@ -25,8 +25,7 @@ export default function EventsList() {
 
   const fetchEvents = async () => {
     try {
-      // Replace with your actual API call
-      const response = await fetch('/api/events');
+      const response = await fetch('http://localhost:5000/api/events');
       const data = await response.json();
       setEvents(data);
     } catch (error) {
@@ -40,7 +39,11 @@ export default function EventsList() {
     if (!confirm('Are you sure you want to delete this event?')) return;
     
     try {
-      await fetch(`/api/events/${id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:5000/api/events/${id}`, { method: 'DELETE' });
+      
+      // 🔴 TRIGGER AUTO-REFRESH ON PUBLIC WEBSITE
+      localStorage.setItem('admin-update', Date.now().toString());
+      
       fetchEvents(); // Refresh list
     } catch (error) {
       console.error('Failed to delete event:', error);

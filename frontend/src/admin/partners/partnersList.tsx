@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Edit, Trash2, Eye, Globe, ExternalLink } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Globe, ExternalLink } from 'lucide-react';
 
 interface Partner {
   id: number;
@@ -23,8 +23,8 @@ export default function PartnersList() {
 
   const fetchPartners = async () => {
     try {
-      // Replace with your actual API call
-      const response = await fetch('/api/partners');
+      // FIXED: Correct API endpoint
+      const response = await fetch('http://localhost:5000/api/partners');
       const data = await response.json();
       setPartners(data);
     } catch (error) {
@@ -38,8 +38,13 @@ export default function PartnersList() {
     if (!confirm('Are you sure you want to remove this partner?')) return;
     
     try {
-      await fetch(`/api/partners/${id}`, { method: 'DELETE' });
-      fetchPartners();
+      // FIXED: Correct API endpoint
+      await fetch(`http://localhost:5000/api/partners/${id}`, { method: 'DELETE' });
+      
+      // 🔴 ONLY THIS LINE ADDED - Trigger auto-refresh on public website
+      localStorage.setItem('admin-update', Date.now().toString());
+      
+      fetchPartners(); // Refresh the list
     } catch (error) {
       console.error('Failed to delete partner:', error);
     }

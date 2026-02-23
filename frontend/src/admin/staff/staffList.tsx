@@ -23,8 +23,7 @@ export default function StaffList() {
 
   const fetchStaff = async () => {
     try {
-      // Replace with your actual API call
-      const response = await fetch('/api/staff');
+      const response = await fetch('http://localhost:5000/api/staff');
       const data = await response.json();
       setStaff(data);
     } catch (error) {
@@ -38,7 +37,11 @@ export default function StaffList() {
     if (!confirm('Are you sure you want to remove this team member?')) return;
     
     try {
-      await fetch(`/api/staff/${id}`, { method: 'DELETE' });
+      await fetch(`http://localhost:5000/api/staff/${id}`, { method: 'DELETE' });
+      
+      // 🔴 TRIGGER AUTO-REFRESH ON PUBLIC WEBSITE
+      localStorage.setItem('admin-update', Date.now().toString());
+      
       fetchStaff();
     } catch (error) {
       console.error('Failed to delete staff:', error);
