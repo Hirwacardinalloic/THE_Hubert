@@ -1,52 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { X, Linkedin, Mail, ChevronRight } from 'lucide-react';
 
-// ============================================
-// YOUR EXISTING HARDCODED STAFF DATA WITH IMAGES
-// ============================================
-const hardcodedStaff = [
-  {
-    id: 1,
-    name: 'Harindintwali Jean Paul',
-    role: 'Chief Executive Officer',
-    image: '/staff/ceo.jpeg',      
-    bio: 'Visionary leader with over 10 years of experience in event management and hospitality.',
-    linkedin: '#',
-    email: 'ceo@thehurbert.com',
-  },
-  {
-    id: 2,
-    name: 'Iyumva Danny',
-    role: 'Chief Marketing Officer',
-    image: '/staff/cmo.jpeg',      
-    bio: 'Marketing expert specializing in luxury brand experiences and customer engagement.',
-    linkedin: '#',
-    email: 'cmo@thehurbert.com',
-  },
-  {
-    id: 3,
-    name: 'Mbabazi Channy',
-    role: 'Site Manager',
-    image: '/staff/sm.jpeg',  
-    bio: 'Ensures flawless execution of all events with meticulous attention to detail.',
-    linkedin: '#',
-    email: 'manager@thehurbert.com',
-  },
-];
-
 export default function Staff() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
   
-  // ============================================
-  // State for database items
-  // ============================================
-  const [dbStaff, setDbStaff] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  // Combine hardcoded + database staff
-  const [staff, setStaff] = useState<any[]>(hardcodedStaff);
+  const [staff, setStaff] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -66,227 +27,462 @@ export default function Staff() {
     return () => observer.disconnect();
   }, []);
 
-  // ============================================
-  // Fetch staff from database
-  // ============================================
   useEffect(() => {
-    const fetchDbStaff = async () => {
+    const fetchStaff = async () => {
       setLoading(true);
       try {
         const response = await fetch('http://localhost:5000/api/staff');
         const data = await response.json();
-        setDbStaff(data.filter((s: any) => s.status === 'active'));
-        setStaff([...hardcodedStaff, ...data.filter((s: any) => s.status === 'active')]);
+        const activeStaff = data.filter((s: any) => s.status === 'active');
+        setStaff(activeStaff);
       } catch (error) {
-        console.error('Error fetching staff from database:', error);
-        // If fetch fails, keep only hardcoded
-        setStaff(hardcodedStaff);
+        console.error('Error fetching staff:', error);
+        setStaff([]);
       } finally {
         setLoading(false);
       }
     };
     
-    fetchDbStaff();
+    fetchStaff();
   }, []);
+
+  const getImageUrl = (image: string) => {
+    if (!image) return '/placeholder.jpg';
+    if (image.startsWith('http')) return image;
+    return image;
+  };
+
+  const styles = `
+    .staff-section {
+      position: relative;
+      width: 100%;
+      padding: 6rem 0;
+      background-color: #f9fafb;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+
+    .staff-pattern {
+      position: absolute;
+      inset: 0;
+      opacity: 0.05;
+      background-image: radial-gradient(circle at 2px 2px, #c9a86c 1px, transparent 0);
+      background-size: 50px 50px;
+      pointer-events: none;
+    }
+
+    .staff-container {
+      position: relative;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .staff-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .staff-subtitle {
+      color: #c9a86c;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .staff-title {
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      font-weight: 700;
+      color: black;
+      margin-bottom: 1rem;
+    }
+
+    .staff-divider {
+      width: 5rem;
+      height: 0.25rem;
+      background-color: #c9a86c;
+      margin: 0 auto;
+      border-radius: 9999px;
+    }
+
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .staff-card {
+      cursor: pointer;
+      background-color: white;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid #e5e7eb;
+    }
+
+    .staff-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+
+    .staff-image-container {
+      aspect-ratio: 3/4;
+      overflow: hidden;
+      background-color: #f3f4f6;
+    }
+
+    .staff-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .staff-card:hover .staff-image {
+      transform: scale(1.1);
+    }
+
+    .staff-info {
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .staff-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: black;
+      margin-bottom: 0.25rem;
+    }
+
+    .staff-role {
+      color: #c9a86c;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(0,0,0,0.8);
+      backdrop-filter: blur(4px);
+      padding: 1rem;
+    }
+
+    .modal-container {
+      position: relative;
+      width: 100%;
+      max-width: 56rem;
+      max-height: 90vh;
+      background-color: white;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 20;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background-color: rgba(0,0,0,0.5);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .modal-close:hover {
+      background-color: #c9a86c;
+    }
+
+    .modal-content {
+      overflow-y: auto;
+      max-height: 90vh;
+    }
+
+    .modal-body {
+      padding: 2rem;
+      background-color: white;
+    }
+
+    .modal-bio {
+      color: #4b5563;
+      line-height: 1.6;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .modal-contact-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 1.5rem;
+    }
+
+    .modal-contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: #4b5563;
+      text-decoration: none;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s ease;
+    }
+
+    .modal-contact-link:hover {
+      background-color: #f3f4f6;
+      color: #c9a86c;
+    }
+
+    .modal-button {
+      width: 100%;
+      background-color: #c9a86c;
+      color: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border: none;
+      cursor: pointer;
+      margin-top: 2rem;
+      transition: background-color 0.2s ease;
+    }
+
+    .modal-button:hover {
+      background-color: black;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .staff-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .staff-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  `;
 
   if (loading) {
     return (
-      <section className="relative w-full py-24 lg:py-32 bg-gray-50">
-        <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-[#c9a86c] border-t-transparent rounded-full animate-spin" />
-        </div>
-      </section>
+      <div style={{
+        width: '100%',
+        padding: '6rem 0',
+        backgroundColor: '#f9fafb',
+        textAlign: 'center'
+      }}>
+        <div style={{
+          width: '2rem',
+          height: '2rem',
+          border: '4px solid #c9a86c',
+          borderTopColor: 'transparent',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto'
+        }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
     );
   }
 
   return (
-    <section
-      id="staff"
-      ref={sectionRef}
-      className="relative w-full py-24 lg:py-32 bg-gray-50 overflow-hidden"
-    >
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `radial-gradient(circle at 2px 2px, #c9a86c 1px, transparent 0)`,
-            backgroundSize: '50px 50px',
-          }}
-        />
-      </div>
+    <>
+      <style>{styles}</style>
 
-      <div className="relative w-full px-4 sm:px-6 lg:px-12 xl:px-20">
-        {/* Section Header */}
-        <div
-          className={`text-center mb-16 transition-all duration-1000 ${
-            isVisible
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-8'
-          }`}
-        >
-          <span
-            className="text-[#c9a86c] text-sm font-semibold uppercase tracking-[0.3em] mb-4 block"
-            style={{ fontFamily: 'Montserrat, sans-serif' }}
-          >
-            Meet
-          </span>
-          <h2
-            className="text-4xl md:text-5xl lg:text-6xl font-bold text-black"
-            style={{ fontFamily: 'Montserrat, sans-serif' }}
-          >
-            Our Team
-          </h2>
-          <div className="flex justify-center mt-4">
-            <div className="w-20 h-1 bg-[#c9a86c] rounded-full" />
+      <section
+        id="staff"
+        ref={sectionRef}
+        className="staff-section"
+      >
+        <div className="staff-pattern" />
+        
+        <div className="staff-container">
+          {/* Section Header */}
+          <div className="staff-header">
+            <span className="staff-subtitle">Meet</span>
+            <h2 className="staff-title">Our Team</h2>
+            <div className="staff-divider" />
           </div>
-        </div>
 
-        {/* Staff Grid */}
-        {staff.length === 0 ? (
-          <p className="text-center text-gray-500">No team members to display</p>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-            {staff.map((member, index) => (
-              <div
-                key={member.id}
-                className={`group relative cursor-pointer transition-all duration-700 ${
-                  isVisible
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-12'
-                }`}
-                style={{ transitionDelay: `${200 + index * 150}ms` }}
-                onClick={() => setSelectedStaff(member)}
-              >
-                <div className="relative rounded-2xl overflow-hidden shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:-translate-y-2">
-                  {/* Image */}
-                  <div className="aspect-square overflow-hidden">
+          {/* Staff Grid */}
+          {staff.length === 0 ? (
+            <p style={{ textAlign: 'center', color: '#6b7280' }}>No team members to display.</p>
+          ) : (
+            <div className="staff-grid">
+              {staff.map((member) => (
+                <div
+                  key={member.id}
+                  className="staff-card"
+                  onClick={() => setSelectedStaff(member)}
+                >
+                  <div className="staff-image-container">
                     <img
-                      src={member.image}
+                      src={getImageUrl(member.image)}
                       alt={member.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      className="staff-image"
                       onError={(e) => {
-                        // If image fails to load, show a placeholder
-                        (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400?text=Team';
+                        (e.target as HTMLImageElement).src = '/placeholder.jpg';
                       }}
                     />
-                    
-                    {/* Gold Overlay on Hover */}
-                    <div className="absolute inset-0 bg-[#c9a86c]/0 group-hover:bg-[#c9a86c]/10 transition-all duration-500" />
                   </div>
-
-                  {/* Info Overlay - Shows on hover */}
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/70 to-transparent p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">
-                    <h3
-                      className="text-xl font-bold text-white mb-1"
-                      style={{ fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      {member.name}
-                    </h3>
-                    <p className="text-[#c9a86c] font-medium text-sm mb-3">
-                      {member.role}
-                    </p>
-                    <div className="flex items-center gap-2 text-white/80 text-sm">
-                      <span>Click to view profile</span>
-                      <ChevronRight className="w-4 h-4" />
-                    </div>
+                  <div className="staff-info">
+                    <h3 className="staff-name">{member.name}</h3>
+                    <p className="staff-role">{member.role}</p>
                   </div>
-
-                  {/* Gold Accent Border */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#c9a86c] transform scale-x-0 origin-left transition-transform duration-500 group-hover:scale-x-100" />
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-                {/* Name below image (visible always) */}
-                <div className="text-center mt-4">
-                  <h3
-                    className="text-lg font-semibold text-black"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    {member.name}
-                  </h3>
-                  <p className="text-gray-500 text-sm">{member.role}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Staff Detail Modal */}
-      {selectedStaff && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
-          onClick={() => setSelectedStaff(null)}
-        >
+        {/* Staff Detail Modal - FIXED with FULL IMAGE */}
+        {selectedStaff && (
           <div
-            className="relative w-full max-w-2xl bg-white rounded-2xl overflow-hidden animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
+            className="modal-overlay"
+            onClick={() => setSelectedStaff(null)}
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedStaff(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
+            <div
+              className="modal-container"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X className="w-5 h-5" />
-            </button>
+              <button
+                className="modal-close"
+                onClick={() => setSelectedStaff(null)}
+              >
+                <X size={20} />
+              </button>
 
-            <div className="flex flex-col md:flex-row">
-              {/* Left - Image */}
-              <div className="md:w-2/5 bg-gray-100">
-                <img
-                  src={selectedStaff.image}
-                  alt={selectedStaff.name}
-                  className="w-full h-64 md:h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x400';
-                  }}
-                />
-              </div>
-
-              {/* Right - Details */}
-              <div className="md:w-3/5 p-8">
-                <div className="mb-6">
-                  <h2
-                    className="text-3xl font-bold text-black mb-2"
-                    style={{ fontFamily: 'Montserrat, sans-serif' }}
-                  >
-                    {selectedStaff.name}
-                  </h2>
-                  <p className="text-[#c9a86c] font-semibold text-lg">
-                    {selectedStaff.role}
-                  </p>
+              <div className="modal-content">
+                {/* FIXED: Image section showing FULL image */}
+                <div style={{
+                  width: '100%',
+                  backgroundColor: '#f3f4f6',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  minHeight: '300px'
+                }}>
+                  <img
+                    src={getImageUrl(selectedStaff.image)}
+                    alt={selectedStaff.name}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      maxHeight: '70vh',
+                      objectFit: 'contain',
+                      objectPosition: 'center',
+                      backgroundColor: '#f3f4f6'
+                    }}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/placeholder.jpg';
+                    }}
+                  />
+                  
+                  {/* Gradient overlay for text */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: '120px',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+                    pointerEvents: 'none'
+                  }} />
+                  
+                  {/* Text overlay */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '2rem',
+                    left: '2rem',
+                    right: '2rem',
+                    pointerEvents: 'none'
+                  }}>
+                    <h2 style={{
+                      fontSize: 'clamp(1.5rem, 4vw, 2rem)',
+                      fontWeight: 700,
+                      color: 'white',
+                      marginBottom: '0.5rem',
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
+                    }}>
+                      {selectedStaff.name}
+                    </h2>
+                    <p style={{
+                      color: '#c9a86c',
+                      fontSize: 'clamp(1rem, 3vw, 1.125rem)',
+                      fontWeight: 500,
+                      textShadow: '1px 1px 2px rgba(0,0,0,0.5)'
+                    }}>
+                      {selectedStaff.role}
+                    </p>
+                  </div>
                 </div>
 
-                <p className="text-gray-600 leading-relaxed mb-8">
-                  {selectedStaff.bio || 'No biography available.'}
-                </p>
+                {/* Content Section */}
+                <div className="modal-body">
+                  <p className="modal-bio">
+                    {selectedStaff.bio || 'No biography available.'}
+                  </p>
 
-                <div className="space-y-4">
-                  <a
-                    href={`mailto:${selectedStaff.email}`}
-                    className="flex items-center gap-3 text-gray-600 hover:text-[#c9a86c] transition-colors"
-                  >
-                    <Mail className="w-5 h-5" />
-                    <span>{selectedStaff.email}</span>
-                  </a>
-                  
-                  {selectedStaff.linkedin && (
+                  <div className="modal-contact-section">
                     <a
-                      href={selectedStaff.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-3 text-gray-600 hover:text-[#c9a86c] transition-colors"
+                      href={`mailto:${selectedStaff.email}`}
+                      className="modal-contact-link"
                     >
-                      <Linkedin className="w-5 h-5" />
-                      <span>LinkedIn Profile</span>
+                      <Mail size={20} />
+                      <span>{selectedStaff.email}</span>
                     </a>
-                  )}
+                    
+                    {selectedStaff.linkedin && (
+                      <a
+                        href={selectedStaff.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="modal-contact-link"
+                      >
+                        <Linkedin size={20} />
+                        <span>LinkedIn Profile</span>
+                      </a>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setSelectedStaff(null);
+                      document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="modal-button"
+                  >
+                    Contact This Team Member
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </section>
+        )}
+      </section>
+    </>
   );
 }
