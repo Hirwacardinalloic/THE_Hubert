@@ -18,6 +18,7 @@ const navItems = [
   { label: 'Contact us', href: '#contact' },
 ];
 
+// Keep social links for mobile menu
 const socialLinks = [
   { name: 'Facebook', url: 'https://www.facebook.com/hirwa.cardinalloic', icon: 'facebook' },
   { name: 'Twitter', url: 'https://x.com/CardinalHirwa', icon: 'twitter' },
@@ -29,6 +30,7 @@ export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,6 +48,19 @@ export default function Header() {
     }
     setIsMobileMenuOpen(false);
     setActiveDropdown(null);
+    setMobileDropdownOpen(null);
+  };
+
+  const scrollToBooking = () => {
+    const element = document.querySelector('#booking');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsMobileMenuOpen(false);
+  };
+
+  const toggleMobileDropdown = (label: string) => {
+    setMobileDropdownOpen(mobileDropdownOpen === label ? null : label);
   };
 
   return (
@@ -100,7 +115,7 @@ export default function Header() {
                   {item.children && <ChevronDown className="w-4 h-4" />}
                 </a>
 
-                {/* Dropdown Menu */}
+                {/* Desktop Dropdown Menu */}
                 {item.children && activeDropdown === item.label && (
                   <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl overflow-hidden animate-fade-in">
                     {item.children.map((child) => (
@@ -123,24 +138,15 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Social Icons - Desktop */}
-          <div className="hidden lg:flex items-center space-x-4">
-            {socialLinks.map((social) => (
-              <a
-                key={social.name}
-                href={social.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-8 h-8 flex items-center justify-center rounded-full transition-all duration-300 hover:scale-110 hover:bg-[#c9a86c] ${
-                  isScrolled
-                    ? 'text-black hover:text-white'
-                    : 'text-white hover:text-white'
-                }`}
-                aria-label={social.name}
-              >
-                <SocialIcon name={social.icon} className="w-4 h-4" />
-              </a>
-            ))}
+          {/* Book Now Button - Desktop (Clean) */}
+          <div className="hidden lg:block">
+            <button
+              onClick={scrollToBooking}
+              className="bg-[#c9a86c] text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider hover:bg-black transition-all duration-300 hover:scale-105 shadow-md"
+              style={{ fontFamily: 'Montserrat, sans-serif' }}
+            >
+              Book Now
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -158,40 +164,76 @@ export default function Header() {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-xl animate-slide-up">
+        <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-xl animate-slide-up max-h-[80vh] overflow-y-auto">
           <nav className="px-4 py-6 space-y-4">
             {navItems.map((item) => (
-              <div key={item.label}>
-                <a
-                  href={item.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    scrollToSection(item.href);
-                  }}
-                  className="block text-black font-medium uppercase tracking-wider py-2 hover:text-[#c9a86c] transition-colors"
-                  style={{ fontFamily: 'Montserrat, sans-serif' }}
-                >
-                  {item.label}
-                </a>
-                {item.children && (
-                  <div className="pl-4 mt-2 space-y-2">
-                    {item.children.map((child) => (
-                      <a
-                        key={child.label}
-                        href={child.href}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          scrollToSection(child.href);
-                        }}
-                        className="block text-gray-600 text-sm py-1 hover:text-[#c9a86c] transition-colors"
-                      >
-                        {child.label}
-                      </a>
-                    ))}
+              <div key={item.label} className="border-b border-gray-100 pb-2">
+                {item.children ? (
+                  // Item with dropdown
+                  <div>
+                    <button
+                      onClick={() => toggleMobileDropdown(item.label)}
+                      className="w-full flex items-center justify-between text-black font-medium uppercase tracking-wider py-2 hover:text-[#c9a86c] transition-colors"
+                      style={{ fontFamily: 'Montserrat, sans-serif' }}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronDown 
+                        className={`w-4 h-4 transition-transform duration-300 ${
+                          mobileDropdownOpen === item.label ? 'rotate-180' : ''
+                        }`} 
+                      />
+                    </button>
+                    
+                    {/* Mobile Dropdown */}
+                    <div 
+                      className={`overflow-hidden transition-all duration-300 ${
+                        mobileDropdownOpen === item.label ? 'max-h-96 mt-2' : 'max-h-0'
+                      }`}
+                    >
+                      <div className="pl-4 space-y-2 pb-2">
+                        {item.children.map((child) => (
+                          <a
+                            key={child.label}
+                            href={child.href}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              scrollToSection(child.href);
+                            }}
+                            className="block text-gray-600 text-sm py-2 hover:text-[#c9a86c] transition-colors"
+                          >
+                            {child.label}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
                   </div>
+                ) : (
+                  // Regular item without dropdown
+                  <a
+                    href={item.href}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      scrollToSection(item.href);
+                    }}
+                    className="block text-black font-medium uppercase tracking-wider py-2 hover:text-[#c9a86c] transition-colors"
+                    style={{ fontFamily: 'Montserrat, sans-serif' }}
+                  >
+                    {item.label}
+                  </a>
                 )}
               </div>
             ))}
+
+            {/* Book Now Button - Mobile */}
+            <div className="pt-4">
+              <button
+                onClick={scrollToBooking}
+                className="w-full bg-[#c9a86c] text-white px-5 py-3 rounded-lg font-semibold uppercase tracking-wider hover:bg-black transition-colors"
+                style={{ fontFamily: 'Montserrat, sans-serif' }}
+              >
+                Book Now
+              </button>
+            </div>
 
             {/* Social Icons - Mobile */}
             <div className="flex items-center space-x-4 pt-4 border-t border-gray-200">
