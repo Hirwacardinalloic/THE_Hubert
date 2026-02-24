@@ -70,7 +70,7 @@ export default function AdminLogin() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-12 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-[#c9a86c] focus:border-transparent transition-all"
-                  placeholder="admin@thehurbert.com"
+                  placeholder="••••••••••••••"
                 />
               </div>
             </div>
@@ -122,13 +122,13 @@ export default function AdminLogin() {
           </form>
 
           {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
+          {/* <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
             <p className="text-xs text-gray-400 text-center">
               <span className="text-[#c9a86c] font-semibold">Demo Credentials:</span><br />
               Email: <span className="text-white">admin@thehurbert.com</span><br />
               Password: <span className="text-white">Hurb3rt@2026!</span>
             </p>
-          </div>
+          </div> */}
         </div>
 
         {/* Back to Website */}
