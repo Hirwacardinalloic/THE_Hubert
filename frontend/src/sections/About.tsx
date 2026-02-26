@@ -113,7 +113,7 @@ export default function About() {
               </p>
             </div>
 
-            {/* CTA Button */}
+            {/* CTA Button - Updated to scroll to booking */}
             <div
               className={`mt-10 transition-all duration-700 delay-500 ${
                 isVisible
@@ -122,11 +122,11 @@ export default function About() {
               }`}
             >
               <button
-                onClick={() => scrollToSection('#services')}
+                onClick={() => scrollToSection('#booking')}
                 className="group inline-flex items-center gap-3 bg-[#c9a86c] text-white px-8 py-4 font-semibold text-sm uppercase tracking-wider rounded transition-all duration-300 hover:bg-black hover:text-white"
                 style={{ fontFamily: 'Montserrat, sans-serif' }}
               >
-                Learn more
+                Book Now
                 <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-2" />
               </button>
             </div>

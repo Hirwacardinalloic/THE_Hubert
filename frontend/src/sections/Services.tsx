@@ -1,72 +1,134 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Calendar, Car, MapPin, Mic, X, Check, Phone, Mail } from 'lucide-react';
+import { ArrowRight, Calendar, Car, MapPin, Mic, X, Check, Phone, Mail, Music, Lightbulb, Film, Table, Home, Cloud, Users, Star, Wifi, Wind, Shield, Clock, Coffee, Compass, Camera, Heart } from 'lucide-react';
 
-// Services data remains hardcoded (your company services)
+// Services data with updated content
 const services = [
   {
     id: 1,
-    title: 'Events Consultancy',
-    description: 'Strategic event planning and expert guidance to make your vision a reality.',
+    title: 'Event Planning',
+    description: 'Comprehensive event planning services from concept to execution. We handle every detail to create unforgettable experiences.',
     image: '/norrsken.png',
     icon: Calendar,
     details: {
-      fullDescription: 'Our Events Consultancy service provides comprehensive strategic planning and expert guidance to transform your vision into a spectacular reality.',
+      fullDescription: 'Our Event Planning service provides end-to-end planning and coordination for all types of events. From intimate gatherings to large-scale celebrations, we ensure every detail is perfectly executed.',
       features: [
-        'Strategic Event Planning & Concept Development',
-        'Budget Management & Cost Optimization',
-        'Venue Selection & Vendor Coordination',
-        'Timeline Creation & Project Management',
+        'Sound System Setup & Engineering',
+        'Professional Lighting Design',
+        'LED Screens & Visual Displays',
+        'Cocktail Tables & Lounge Setup',
+        'Round Tables & Seating Arrangements',
+        'Event Decorations & Styling',
+        'Smoke Machines & Special Effects',
+        'Professional Manpower & Staff',
+        'Wedding Planning & Coordination',
+        'Corporate Meeting Management',
       ],
       benefits: [
-        'Save time and reduce stress with professional guidance',
-        'Access to our extensive network of trusted vendors',
-        'Expert negotiation for better rates and services',
+        'Stress-free event experience with professional coordination',
+        'High-quality audio-visual equipment for memorable experiences',
+        'Elegant decorations that match your theme and vision',
+        'Professional staff to ensure smooth event flow',
+        'Custom packages tailored to your specific needs',
+        'Access to exclusive venues and vendors',
       ],
     },
   },
   {
     id: 2,
     title: 'Event Production',
-    description: 'Full-service production and execution for seamless events of any scale.',
+    description: 'Full-scale production services including sound, lighting, screens, staging, and technical execution for events of any size.',
     image: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=800&q=80',
     icon: Mic,
     details: {
-      fullDescription: 'From concept to completion, our Event Production service handles every aspect of your event execution.',
+      fullDescription: 'Our Event Production service delivers professional technical production for events of all scales. We bring your vision to life with state-of-the-art equipment and expert technical direction.',
       features: [
-        'Audio-Visual Equipment & Technical Support',
-        'Stage Design & Setup',
-        'Lighting & Sound Engineering',
-        'On-site Event Coordination',
+        'Professional Sound Systems & Engineering',
+        'Stage Lighting & Design',
+        'LED Walls & Video Screens',
+        'Cocktail & Round Tables Setup',
+        'Event Decorations & Ambiance',
+        'Smoke Machines & Atmospheric Effects',
+        'Event Staff & Manpower',
+        'Technical Direction & Support',
       ],
       benefits: [
-        'Professional execution ensuring flawless events',
-        'State-of-the-art equipment and technology',
-        '24/7 support during your event',
+        'Crystal-clear sound quality for speeches and performances',
+        'Dynamic lighting that transforms your venue',
+        'High-impact visual displays for presentations',
+        'Professional stage setup that wows your audience',
+        'Seamless technical execution from start to finish',
+        'Dedicated technical support throughout your event',
       ],
     },
   },
   {
     id: 3,
     title: 'Car Rental',
-    description: 'Premium vehicles and professional drivers for your transportation needs.',
+    description: 'Premium vehicle rental services with professional drivers. We provide luxury transportation for events, corporate travel, and special occasions.',
     image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800&q=80',
     icon: Car,
-    isDynamic: true, // This will fetch from database
+    details: {
+      fullDescription: 'Our Car Rental service offers premium vehicles with professional chauffeurs for all your transportation needs. Whether for corporate events, weddings, airport transfers, or leisure travel, we ensure comfort, safety, and style.',
+      features: [
+        'Luxury SUV Fleet (Toyota RAV4, Land Cruiser Prado, Range Rover)',
+        'Executive Sedans (Mercedes C300) for Business Travel',
+        'Coaster Buses for Group Transportation',
+        'Professional Chauffeur Services',
+        'Airport Transfer & Pickup Services',
+        'Event Transportation Coordination',
+        'Wedding Car Hire with Decoration',
+        'Corporate Fleet Services',
+        '24/7 Customer Support',
+        'Flexible Rental Packages',
+      ],
+      benefits: [
+        'Travel in comfort and style with our premium fleet',
+        'Professional drivers ensure safe and punctual transportation',
+        'Perfect for corporate clients impressing business partners',
+        'Stress-free airport transfers and event logistics',
+        'Well-maintained vehicles for reliable performance',
+        'Competitive rates with no hidden fees',
+        'Customized transportation solutions for groups',
+      ],
+    },
   },
   {
     id: 4,
     title: 'Destination Management',
-    description: 'Complete destination experiences showcasing the best of Rwanda.',
+    description: 'Complete destination management services showcasing the best of Rwanda. We create unforgettable experiences through curated tours and activities.',
     image: '/tourism.png',
     icon: MapPin,
-    isDynamic: true, // This will fetch from database
+    details: {
+      fullDescription: 'Our Destination Management service offers comprehensive tour packages and experiences across Rwanda. From gorilla trekking to cultural tours, we create authentic adventures that showcase the beauty and hospitality of our country.',
+      features: [
+        'Gorilla Trekking Expeditions',
+        'National Park Safaris (Akagera, Nyungwe, Volcanoes)',
+        'Lake Kivu & Lake Muhazi Excursions',
+        'Cultural & Heritage Tours',
+        'Museum Visits (Nyanza Palace, Ethnographic Museum)',
+        'Custom Itinerary Planning',
+        'Professional Tour Guides',
+        'Transportation & Logistics',
+        'Accommodation Booking',
+        'Corporate Retreat Packages',
+      ],
+      benefits: [
+        'Authentic Rwandan experiences with local expertise',
+        'Hassle-free travel with all logistics handled',
+        'Expert guides who share deep cultural knowledge',
+        'Custom itineraries tailored to your interests',
+        'Access to exclusive experiences and locations',
+        'Safe and comfortable travel arrangements',
+        'Memorable adventures that create lasting impressions',
+      ],
+    },
   },
 ];
 
 const CONTACT_INFO = {
   phone: '0782169162',
   whatsapp: '250782169162',
-  email: 'cardinaloichirwa@gmail.com',
+  email: 'thehurbertltd@gmail.com', // ✅ Updated email
   address: '1 KN 78 St, Kigali',
 };
 
@@ -75,10 +137,6 @@ export default function Services() {
   const [isVisible, setIsVisible] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
   const [selectedService, setSelectedService] = useState<any | null>(null);
-  const [cars, setCars] = useState<any[]>([]);
-  const [tours, setTours] = useState<any[]>([]);
-  const [selectedCar, setSelectedCar] = useState<any | null>(null);
-  const [selectedTour, setSelectedTour] = useState<any | null>(null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -98,31 +156,6 @@ export default function Services() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    fetchCars();
-    fetchTours();
-  }, []);
-
-  const fetchCars = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/cars');
-      const data = await response.json();
-      setCars(data.filter((c: any) => c.status === 'available'));
-    } catch (error) {
-      console.error('Failed to fetch cars:', error);
-    }
-  };
-
-  const fetchTours = async () => {
-    try {
-      const response = await fetch('http://localhost:5000/api/tourism');
-      const data = await response.json();
-      setTours(data.filter((t: any) => t.status === 'active'));
-    } catch (error) {
-      console.error('Failed to fetch tours:', error);
-    }
-  };
-
   const scrollToSection = (href: string) => {
     const element = document.querySelector(href);
     if (element) {
@@ -134,6 +167,18 @@ export default function Services() {
   const openWhatsApp = (serviceName: string) => {
     const message = encodeURIComponent(`Hello THE HURBERT! I'm interested in your ${serviceName} service.`);
     window.open(`https://wa.me/${CONTACT_INFO.whatsapp}?text=${message}`, '_blank');
+  };
+
+  // ✅ FIXED: Using Gmail web interface like in contact.tsx
+  const openEmail = (serviceName: string) => {
+    const subject = encodeURIComponent(`Inquiry about ${serviceName} Services`);
+    const body = encodeURIComponent(
+      `Hello THE HURBERT,\n\nI'm interested in learning more about your ${serviceName} services.\n\nPlease provide me with more information.\n\nThank you.`
+    );
+    
+    // Open Gmail compose window (like in contact.tsx)
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${CONTACT_INFO.email}&su=${subject}&body=${body}`;
+    window.open(gmailUrl, '_blank');
   };
 
   return (
@@ -229,17 +274,7 @@ export default function Services() {
 
                     {/* CTA Link */}
                     <button
-                      onClick={() => {
-                        if (service.isDynamic && service.title === 'Car Rental') {
-                          // Show cars list
-                          setSelectedService({ title: 'Car Rental', items: cars, type: 'car' });
-                        } else if (service.isDynamic && service.title === 'Destination Management') {
-                          // Show tours list
-                          setSelectedService({ title: 'Tours', items: tours, type: 'tour' });
-                        } else {
-                          setSelectedService(service);
-                        }
-                      }}
+                      onClick={() => setSelectedService(service)}
                       className="inline-flex items-center gap-2 text-[#c9a86c] font-semibold text-sm uppercase tracking-wider transition-all duration-300 hover:gap-4"
                       style={{ fontFamily: 'Montserrat, sans-serif' }}
                     >
@@ -258,7 +293,7 @@ export default function Services() {
       </div>
 
       {/* Service Detail Modal */}
-      {selectedService && !selectedService.items && (
+      {selectedService && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
           onClick={() => setSelectedService(null)}
@@ -305,7 +340,7 @@ export default function Services() {
                   {selectedService.details.fullDescription}
                 </p>
 
-                {/* Features */}
+                {/* What We Offer / Features */}
                 <div className="mb-8">
                   <h3
                     className="text-xl font-bold text-black mb-4"
@@ -331,7 +366,7 @@ export default function Services() {
                     className="text-xl font-bold text-black mb-4"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
-                    Benefits
+                    Why Choose Us
                   </h3>
                   <div className="grid md:grid-cols-2 gap-3">
                     {selectedService.details.benefits.map((benefit: string, index: number) => (
@@ -364,7 +399,7 @@ export default function Services() {
                     Chat on WhatsApp
                   </button>
                   <button
-                    onClick={() => window.open(`mailto:${CONTACT_INFO.email}`, '_blank')}
+                    onClick={() => openEmail(selectedService.title)}
                     className="flex-1 bg-blue-500 text-white px-6 py-4 rounded-lg font-semibold text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 hover:bg-blue-600"
                     style={{ fontFamily: 'Montserrat, sans-serif' }}
                   >
@@ -372,166 +407,6 @@ export default function Services() {
                     Send Email
                   </button>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cars/Tours List Modal */}
-      {selectedService?.items && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
-          onClick={() => setSelectedService(null)}
-        >
-          <div
-            className="relative w-full max-w-4xl max-h-[90vh] bg-white rounded-2xl overflow-hidden animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedService(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="overflow-y-auto max-h-[90vh]">
-              <div className="p-6 md:p-10">
-                <h2 className="text-3xl font-bold text-black mb-6">{selectedService.title}</h2>
-                
-                {selectedService.items.length === 0 ? (
-                  <p className="text-gray-500">No items available at the moment.</p>
-                ) : (
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {selectedService.items.map((item: any) => (
-                      <div
-                        key={item.id}
-                        className="border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-shadow cursor-pointer"
-                        onClick={() => {
-                          if (selectedService.type === 'car') {
-                            setSelectedCar(item);
-                          } else {
-                            setSelectedTour(item);
-                          }
-                          setSelectedService(null);
-                        }}
-                      >
-                        <img
-                          src={item.image || 'https://via.placeholder.com/400x300'}
-                          alt={item.title}
-                          className="w-full h-48 object-cover rounded-lg mb-4"
-                        />
-                        <h3 className="font-bold text-lg mb-2">{item.title}</h3>
-                        {selectedService.type === 'car' && (
-                          <>
-                            <p className="text-[#c9a86c] font-semibold mb-2">{item.price}</p>
-                            <p className="text-sm text-gray-600">{item.features}</p>
-                          </>
-                        )}
-                        {selectedService.type === 'tour' && (
-                          <>
-                            <p className="text-gray-600 mb-2">{item.location}</p>
-                            <p className="text-sm text-gray-500">Duration: {item.duration}</p>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Car Detail Modal */}
-      {selectedCar && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
-          onClick={() => setSelectedCar(null)}
-        >
-          <div
-            className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setSelectedCar(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-1/2 bg-gray-100">
-                <img
-                  src={selectedCar.image || 'https://via.placeholder.com/800x600'}
-                  alt={selectedCar.title}
-                  className="w-full h-64 md:h-full object-cover"
-                />
-              </div>
-
-              <div className="md:w-1/2 p-8">
-                <h2 className="text-3xl font-bold text-black mb-2">{selectedCar.title}</h2>
-                <p className="text-[#c9a86c] font-semibold text-xl mb-4">{selectedCar.price}</p>
-                <p className="text-gray-600 mb-6">{selectedCar.description}</p>
-                <p className="text-gray-700 mb-4">{selectedCar.features}</p>
-                <button
-                  onClick={() => {
-                    setSelectedCar(null);
-                    document.querySelector('#booking')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="w-full bg-[#c9a86c] text-white px-6 py-4 rounded-lg font-semibold hover:bg-black transition-colors"
-                >
-                  Book This Car
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Tour Detail Modal */}
-      {selectedTour && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-fade-in p-4"
-          onClick={() => setSelectedTour(null)}
-        >
-          <div
-            className="relative w-full max-w-4xl bg-white rounded-2xl overflow-hidden animate-slide-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setSelectedTour(null)}
-              className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/50 text-white flex items-center justify-center hover:bg-[#c9a86c] transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <div className="flex flex-col md:flex-row">
-              <div className="md:w-1/2 bg-gray-100">
-                <img
-                  src={selectedTour.image || 'https://via.placeholder.com/800x600'}
-                  alt={selectedTour.title}
-                  className="w-full h-64 md:h-full object-cover"
-                />
-              </div>
-
-              <div className="md:w-1/2 p-8">
-                <h2 className="text-3xl font-bold text-black mb-2">{selectedTour.title}</h2>
-                <p className="text-gray-600 mb-4">{selectedTour.location}</p>
-                <p className="text-gray-700 mb-4">{selectedTour.description}</p>
-                <p className="text-sm text-gray-500 mb-2">Duration: {selectedTour.duration}</p>
-                <p className="text-sm text-gray-500 mb-4">Best time: {selectedTour.bestTime}</p>
-                <button
-                  onClick={() => {
-                    setSelectedTour(null);
-                    document.querySelector('#booking')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="w-full bg-[#c9a86c] text-white px-6 py-4 rounded-lg font-semibold hover:bg-black transition-colors"
-                >
-                  Book This Tour
-                </button>
               </div>
             </div>
           </div>
