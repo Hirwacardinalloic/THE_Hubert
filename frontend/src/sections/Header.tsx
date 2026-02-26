@@ -63,6 +63,11 @@ export default function Header() {
     setMobileDropdownOpen(mobileDropdownOpen === label ? null : label);
   };
 
+  // Open THE HURBERT exact location in Google Maps
+  const openCompanyLocation = () => {
+    window.open('https://maps.google.com/?q=1+KN+78+St,+Kigali,+Rwanda', '_blank');
+  };
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -138,8 +143,31 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Book Now Button - Desktop (Clean) */}
-          <div className="hidden lg:block">
+          {/* Location Button + Book Now - Desktop */}
+          <div className="hidden lg:flex items-center space-x-3">
+            {/* Rectangle Location Button with Flag */}
+            <button
+              onClick={openCompanyLocation}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all duration-300 hover:scale-105 hover:border-[#c9a86c] ${
+                isScrolled 
+                  ? 'border-gray-300 text-black hover:bg-gray-50' 
+                  : 'border-white/50 text-white hover:bg-white/10'
+              }`}
+              aria-label="View THE HURBERT office location"
+              title="1 KN 78 St, Kigali - Click to open in Google Maps"
+            >
+              <img 
+                src="/flags/rwanda-flag.png" 
+                alt="Rwanda" 
+                className="w-5 h-4 object-cover rounded-sm"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://flagcdn.com/w320/rw.png';
+                }}
+              />
+              <span className="text-sm font-medium">Kigali</span>
+            </button>
+
+            {/* Book Now Button */}
             <button
               onClick={scrollToBooking}
               className="bg-[#c9a86c] text-white px-5 py-2 rounded-lg text-sm font-semibold uppercase tracking-wider hover:bg-black transition-all duration-300 hover:scale-105 shadow-md"
@@ -162,7 +190,7 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - Location Button Removed */}
       {isMobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-white shadow-xl animate-slide-up max-h-[80vh] overflow-y-auto">
           <nav className="px-4 py-6 space-y-4">
