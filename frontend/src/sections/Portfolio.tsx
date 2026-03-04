@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, Calendar, MapPin, X, Users, Clock, Car, Star, Briefcase, Mountain, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, X, Users, Clock, Car, Star, Briefcase, Mountain, ChevronLeft, ChevronRight, CheckCircle, Circle } from 'lucide-react';
 
 export default function Portfolio() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -15,8 +15,57 @@ export default function Portfolio() {
   // Gallery states
   const [galleryImages, setGalleryImages] = useState<{[key: string]: string[]}>({});
   const [currentImageIndex, setCurrentImageIndex] = useState<{[key: string]: number}>({});
+  const [autoPlayInterval, setAutoPlayInterval] = useState<NodeJS.Timeout | null>(null);
 
   const queryClient = useQueryClient();
+
+  // Auto-play effect when modal opens
+  useEffect(() => {
+    if (selectedEvent || selectedCar || selectedTourism) {
+      // Clear any existing interval
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+      }
+      
+      // Set new interval for auto-play (4 seconds)
+      const interval = setInterval(() => {
+        if (selectedEvent) {
+          const key = `event-${selectedEvent.id}`;
+          if (galleryImages[key]?.length > 1) {
+            setCurrentImageIndex(prev => ({
+              ...prev,
+              [key]: ((prev[key] || 0) + 1) % galleryImages[key].length
+            }));
+          }
+        } else if (selectedCar) {
+          const key = `car-${selectedCar.id}`;
+          if (galleryImages[key]?.length > 1) {
+            setCurrentImageIndex(prev => ({
+              ...prev,
+              [key]: ((prev[key] || 0) + 1) % galleryImages[key].length
+            }));
+          }
+        } else if (selectedTourism) {
+          const key = `tourism-${selectedTourism.id}`;
+          if (galleryImages[key]?.length > 1) {
+            setCurrentImageIndex(prev => ({
+              ...prev,
+              [key]: ((prev[key] || 0) + 1) % galleryImages[key].length
+            }));
+          }
+        }
+      }, 4000);
+      
+      setAutoPlayInterval(interval);
+    }
+    
+    // Cleanup on modal close
+    return () => {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+      }
+    };
+  }, [selectedEvent, selectedCar, selectedTourism, galleryImages]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -478,7 +527,7 @@ const parseJsonField = (field: any) => {
         </div>
       )}
 
-      {/* Event Modal with Carousel */}
+      {/* Event Modal with Auto-Playing Carousel */}
       {selectedEvent && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
@@ -498,11 +547,10 @@ const parseJsonField = (field: any) => {
             <div className="overflow-y-auto max-h-[90vh]">
               {/* Image Carousel */}
               <div className="relative h-64 md:h-80 bg-gray-900">
-                {/* Main Image */}
                 <img
                   src={getImageUrl(galleryImages[`event-${selectedEvent.id}`]?.[currentImageIndex[`event-${selectedEvent.id}`] || 0] || selectedEvent.image)}
                   alt={selectedEvent.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-opacity duration-500"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/placeholder.jpg';
                   }}
@@ -555,6 +603,13 @@ const parseJsonField = (field: any) => {
                   </div>
                 )}
 
+                {/* Auto-play indicator */}
+                {galleryImages[`event-${selectedEvent.id}`]?.length > 1 && (
+                  <div className="absolute top-4 right-4 z-20 bg-black/50 text-white text-xs px-3 py-1 rounded-full">
+                    {currentImageIndex[`event-${selectedEvent.id}`] + 1} / {galleryImages[`event-${selectedEvent.id}`].length}
+                  </div>
+                )}
+
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
                 
@@ -594,12 +649,15 @@ const parseJsonField = (field: any) => {
 
                 {selectedEvent.servicesProvided && (
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-3">Services Provided</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <h3 className="text-xl font-bold text-black mb-4 border-b border-gray-200 pb-2">
+                      Services Provided
+                    </h3>
+                    <div className="space-y-2">
                       {parseJsonField(selectedEvent.servicesProvided).map((service: string, i: number) => (
-                        <span key={i} className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] rounded-full">
-                          {service}
-                        </span>
+                        <div key={i} className="flex items-start gap-3">
+                          <Circle className="w-2 h-2 text-[#c9a86c] mt-2 fill-current" />
+                          <span className="text-gray-700">{service}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -608,7 +666,7 @@ const parseJsonField = (field: any) => {
                 {selectedEvent.client && (
                   <div className="p-4 bg-gray-50 rounded-lg mb-6">
                     <p className="text-sm text-gray-500">Client</p>
-                    <p className="font-semibold">{selectedEvent.client}</p>
+                    <p className="font-semibold text-black">{selectedEvent.client}</p>
                   </div>
                 )}
 
@@ -624,7 +682,7 @@ const parseJsonField = (field: any) => {
         </div>
       )}
 
-      {/* Car Modal with Carousel */}
+      {/* Car Modal with Auto-Playing Carousel */}
       {selectedCar && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
@@ -648,7 +706,7 @@ const parseJsonField = (field: any) => {
                   <img
                     src={getImageUrl(galleryImages[`car-${selectedCar.id}`]?.[currentImageIndex[`car-${selectedCar.id}`] || 0] || selectedCar.image)}
                     alt={selectedCar.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-opacity duration-500"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = '/placeholder.jpg';
                     }}
@@ -680,25 +738,30 @@ const parseJsonField = (field: any) => {
 
                   {/* Dot Indicators */}
                   {galleryImages[`car-${selectedCar.id}`]?.length > 1 && (
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
-                      {galleryImages[`car-${selectedCar.id}`].map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setCurrentImageIndex(prev => ({
-                              ...prev,
-                              [`car-${selectedCar.id}`]: index
-                            }));
-                          }}
-                          className={`w-1.5 h-1.5 rounded-full transition-all ${
-                            index === currentImageIndex[`car-${selectedCar.id}`]
-                              ? 'w-3 bg-[#c9a86c]'
-                              : 'bg-white/70'
-                          }`}
-                        />
-                      ))}
-                    </div>
+                    <>
+                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+                        {galleryImages[`car-${selectedCar.id}`].map((_, index) => (
+                          <button
+                            key={index}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCurrentImageIndex(prev => ({
+                                ...prev,
+                                [`car-${selectedCar.id}`]: index
+                              }));
+                            }}
+                            className={`w-1.5 h-1.5 rounded-full transition-all ${
+                              index === currentImageIndex[`car-${selectedCar.id}`]
+                                ? 'w-3 bg-[#c9a86c]'
+                                : 'bg-white/70'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded-full">
+                        {currentImageIndex[`car-${selectedCar.id}`] + 1} / {galleryImages[`car-${selectedCar.id}`].length}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -710,9 +773,27 @@ const parseJsonField = (field: any) => {
                 <h2 className="text-3xl font-bold mb-2">{selectedCar.title}</h2>
                 <p className="text-[#c9a86c] font-semibold text-xl mb-4">{selectedCar.price}</p>
                 <p className="text-gray-600 mb-6">{selectedCar.description}</p>
-                <p className="text-gray-600 mb-2">Features: {selectedCar.features}</p>
-                <p className="text-gray-600 mb-2">Transmission: {selectedCar.transmission}</p>
-                <p className="text-gray-600 mb-6">Fuel: {selectedCar.fuel}</p>
+                
+                {/* Features as styled tags */}
+                {selectedCar.features && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-2">Features:</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedCar.features.split('•').map((feature: string, i: number) => (
+                        feature.trim() && (
+                          <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                            {feature.trim()}
+                          </span>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-2 mb-6 text-sm">
+                  <p><span className="font-semibold">Transmission:</span> {selectedCar.transmission}</p>
+                  <p><span className="font-semibold">Fuel:</span> {selectedCar.fuel}</p>
+                </div>
 
                 <button
                   onClick={() => scrollToBooking('car')}
@@ -726,7 +807,7 @@ const parseJsonField = (field: any) => {
         </div>
       )}
 
-      {/* Tourism Modal with Carousel */}
+      {/* Tourism Modal with Auto-Playing Carousel */}
       {selectedTourism && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
@@ -749,7 +830,7 @@ const parseJsonField = (field: any) => {
                 <img
                   src={getImageUrl(galleryImages[`tourism-${selectedTourism.id}`]?.[currentImageIndex[`tourism-${selectedTourism.id}`] || 0] || selectedTourism.image)}
                   alt={selectedTourism.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-opacity duration-500"
                   onError={(e) => {
                     (e.target as HTMLImageElement).src = '/placeholder.jpg';
                   }}
@@ -781,25 +862,30 @@ const parseJsonField = (field: any) => {
 
                 {/* Dot Indicators */}
                 {galleryImages[`tourism-${selectedTourism.id}`]?.length > 1 && (
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-                    {galleryImages[`tourism-${selectedTourism.id}`].map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setCurrentImageIndex(prev => ({
-                            ...prev,
-                            [`tourism-${selectedTourism.id}`]: index
-                          }));
-                        }}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          index === currentImageIndex[`tourism-${selectedTourism.id}`]
-                            ? 'w-4 bg-[#c9a86c]'
-                            : 'bg-white/50 hover:bg-white'
-                        }`}
-                      />
-                    ))}
-                  </div>
+                  <>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                      {galleryImages[`tourism-${selectedTourism.id}`].map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentImageIndex(prev => ({
+                              ...prev,
+                              [`tourism-${selectedTourism.id}`]: index
+                            }));
+                          }}
+                          className={`w-2 h-2 rounded-full transition-all ${
+                            index === currentImageIndex[`tourism-${selectedTourism.id}`]
+                              ? 'w-4 bg-[#c9a86c]'
+                              : 'bg-white/50 hover:bg-white'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <div className="absolute top-4 right-4 z-20 bg-black/50 text-white text-xs px-3 py-1 rounded-full">
+                      {currentImageIndex[`tourism-${selectedTourism.id}`] + 1} / {galleryImages[`tourism-${selectedTourism.id}`].length}
+                    </div>
+                  </>
                 )}
 
                 {/* Gradient Overlay */}
@@ -841,12 +927,15 @@ const parseJsonField = (field: any) => {
 
                 {selectedTourism.activities && (
                   <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-3">Activities</h3>
-                    <div className="flex flex-wrap gap-2">
+                    <h3 className="text-xl font-bold text-black mb-4 border-b border-gray-200 pb-2">
+                      Activities
+                    </h3>
+                    <div className="grid grid-cols-2 gap-2">
                       {parseJsonField(selectedTourism.activities).map((activity: string, i: number) => (
-                        <span key={i} className="px-4 py-2 bg-[#c9a86c]/10 text-[#c9a86c] rounded-full">
-                          {activity}
-                        </span>
+                        <div key={i} className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg">
+                          <CheckCircle className="w-4 h-4 text-[#c9a86c] flex-shrink-0" />
+                          <span className="text-sm text-gray-700">{activity}</span>
+                        </div>
                       ))}
                     </div>
                   </div>
