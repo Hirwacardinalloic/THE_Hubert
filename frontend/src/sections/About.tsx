@@ -1,16 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { Play, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setIsVisible(true);
+          // Show video when section becomes visible
+          setShowVideo(true);
           observer.unobserve(entry.target);
         }
       },
@@ -95,8 +97,8 @@ export default function About() {
                     : 'opacity-0 translate-y-6'
                 }`}
               >
-                Our comprehensive services include event consultancy, production,
-                car rental, and destination management. We pride ourselves on
+                Our comprehensive services include event planning, production,
+                car rental, and Tourism. We pride ourselves on
                 delivering exceptional experiences that exceed our clients'
                 expectations.
               </p>
@@ -113,7 +115,7 @@ export default function About() {
               </p>
             </div>
 
-            {/* CTA Button - Updated to scroll to booking */}
+            {/* CTA Button */}
             <div
               className={`mt-10 transition-all duration-700 delay-500 ${
                 isVisible
@@ -132,7 +134,7 @@ export default function About() {
             </div>
           </div>
 
-          {/* Video/Image Section */}
+          {/* Video Section - Auto-playing YouTube */}
           <div
             className={`relative transition-all duration-1000 delay-300 ${
               isVisible
@@ -140,104 +142,39 @@ export default function About() {
                 : 'opacity-0 translate-x-12'
             }`}
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl group">
-              {/* Main Image */}
-              <div className="aspect-video relative overflow-hidden">
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-video">
+              {showVideo ? (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  // ============================================
+                  // TODO: Replace this YouTube video with your real company video
+                  // 1. Upload your video to YouTube or Vimeo
+                  // 2. Replace the video ID in the src below
+                  // 3. Keep ?autoplay=1&mute=1&loop=1&playlist=VIDEO_ID for auto-play
+                  // ============================================
+                  src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&loop=1&playlist=dQw4w9WgXcQ&controls=0&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1"
+                  title="THE HURBERT Company Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full"
+                />
+              ) : (
                 <img
                   src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80"
                   alt="THE HURBERT"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="w-full h-full object-cover"
                 />
-
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-black/30 transition-opacity duration-300 group-hover:opacity-40" />
-
-                {/* Play Button */}
-                <button
-                  onClick={() => setIsVideoModalOpen(true)}
-                  className="absolute inset-0 flex items-center justify-center"
-                  aria-label="Play video"
-                >
-                  <div className="relative">
-                    {/* Pulse Rings */}
-                    <div className="absolute inset-0 rounded-full bg-white/30 animate-ping" />
-                    <div
-                      className="absolute inset-0 rounded-full bg-white/20 animate-ping"
-                      style={{ animationDelay: '0.5s' }}
-                    />
-
-                    {/* Play Icon */}
-                    <div className="relative w-20 h-20 rounded-full bg-[#c9a86c] flex items-center justify-center transition-all duration-300 group-hover:scale-110 shadow-lg">
-                      <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
-                    </div>
-                  </div>
-                </button>
-              </div>
+              )}
 
               {/* Decorative Elements */}
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#c9a86c]/20 rounded-full blur-2xl" />
-              <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#c9a86c]/10 rounded-full blur-xl" />
+              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#c9a86c]/20 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#c9a86c]/10 rounded-full blur-xl pointer-events-none" />
             </div>
-
-            {/* Stats Cards - Hidden but code preserved */}
-            {false && (
-              <div className="grid grid-cols-3 gap-4 mt-8">
-                {[
-                  { number: '500+', label: 'Events' },
-                  { number: '50+', label: 'Partners' },
-                  { number: '10+', label: 'Years' },
-                ].map((stat, index) => (
-                  <div
-                    key={stat.label}
-                    className={`text-center p-4 bg-gray-50 rounded-lg transition-all duration-700 ${
-                      isVisible
-                        ? 'opacity-100 translate-y-0'
-                        : 'opacity-0 translate-y-6'
-                    }`}
-                    style={{ transitionDelay: `${600 + index * 100}ms` }}
-                  >
-                    <div
-                      className="text-2xl md:text-3xl font-bold text-[#c9a86c]"
-                      style={{ fontFamily: 'Montserrat, sans-serif' }}
-                    >
-                      {stat.number}
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
         </div>
       </div>
-
-      {/* Video Modal */}
-      {isVideoModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 animate-fade-in"
-          onClick={() => setIsVideoModalOpen(false)}
-        >
-          <div className="relative w-full max-w-4xl mx-4">
-            <button
-              onClick={() => setIsVideoModalOpen(false)}
-              className="absolute -top-12 right-0 text-white hover:text-[#c9a86c] transition-colors"
-            >
-              Close
-            </button>
-            <div className="aspect-video bg-black rounded-lg overflow-hidden">
-              <iframe
-                width="100%"
-                height="100%"
-                src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
-                title="THE HURBERT Video"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
